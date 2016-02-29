@@ -1,0 +1,134 @@
+
+ <!-- action usual -->
+ [#if DATA_SOURCE="noodevices" || DATA_SOURCE=""#]
+ <!-- table noodevices search -->
+ [#if VIEW_MODE="search_noodevices" || VIEW_MODE=""#]
+<!-- table zwave_devices search -->
+<div>
+ [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
+</div>
+<div style="display:none" id='api_settings'>
+&nbsp;
+<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+<fieldset>
+
+<div class="form-group">
+ <label class="control-label">
+ Notification setting:
+ </label>
+ <div class="controls">
+  [#if API_TYPE="" || API_TYPE="windows"#]
+  http://localhost/ajax/noolite.html
+  [#endif API_TYPE#]
+
+  [#if API_TYPE="linux"#]
+/etc/noolite.conf
+<pre>command = wget -qO- http://localhost/ajax/noolite.html?channel=%ch\&command=%cm\&d0=%d0\&d1=%d1\&d2=%d2\&d3=%d3 $
+timeout = 250</pre>
+  [#endif#]
+
+ </div>
+</div>
+
+
+<div class="form-group">
+ <label class="control-label"[#if ERR_API_TYPE#] style="color:red;font-weight:bold"[#endif#]>
+ API Type:
+ </label>
+ <div class="controls">
+ <input type="radio" name="api_type" value="windows"[#if API_TYPE="" || API_TYPE="windows"#] checked[#endif#]> Windows App
+ &nbsp;&nbsp;&nbsp;
+ <input type="radio" name="api_type" value="linux"[#if API_TYPE="linux"#] checked[#endif#]> Linux App
+ <!---
+ &nbsp;&nbsp;&nbsp;
+ <input type="radio" name="api_type" value="ext"[#if API_TYPE="ext"#] checked[#endif#]> External
+ #-->
+ </div>
+</div>
+
+<!--#
+<div class="form-group">
+ <label class="control-label"[#if ERR_API_URL#] style="color:red;font-weight:bold"[#endif#]>
+ API URL:
+ </label>
+ <div class="controls"><input type="text" name="api_url" value="<#API_URL#>" class="input"></div>
+</div>
+#-->
+
+
+<div class="form-actions">
+<button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+<input type="hidden" name="view_mode" value="update_settings">
+<input type="hidden" name="mode" value="update">
+</div>
+</fieldset>
+</form>
+</div>
+&nbsp;
+  [#inc noodevices_search_admin.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table noodevices search -->
+ <!-- table noodevices edit -->
+ [#if VIEW_MODE="edit_noodevices"#]
+   [#if ID!=""#]
+   [#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
+<ul class="nav nav-tabs">
+  <li[#if TAB=""#] class="active"[#endif#]>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a>
+  </li>
+  <li[#if TAB="data"#] class="active"[#endif#]>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
+  </li>
+</ul>
+&nbsp;<br/>
+   [#endif ID#]
+   [#if TAB=""#]
+    [#inc noodevices_edit_default.html#]
+   [#endif TAB#]
+   [#if TAB="data"#]
+    [#inc noodevices_edit_data.html#]
+   [#endif TAB#]
+ [#endif VIEW_MODE#]
+ <!-- / table noodevices edit -->
+ <!-- table noodevices view --> 
+ [#if VIEW_MODE="view_noodevices"#]
+   [#if TAB=""#]
+    [#inc noodevices_view_default.html#]
+   [#endif TAB#]
+ [#endif VIEW_MODE#]
+ <!-- / table noodevices view -->
+ [#endif DATA_SOURCE#]
+ <!-- action usual -->
+ [#if DATA_SOURCE="noocommands"#]
+ <!-- table noocommands search -->
+ [#if VIEW_MODE="search_noocommands" || VIEW_MODE=""#]
+<!-- table zwave_devices search -->
+<div>
+ [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
+</div>
+<div style="display:none" id='api_settings'>
+&nbsp;
+<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+<fieldset>
+<div class="form-actions">
+<button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+<input type="hidden" name="view_mode" value="update_settings">
+<input type="hidden" name="mode" value="update">
+</div>
+</fieldset>
+</form>
+</div>
+  [#inc noocommands_search_admin.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table noocommands search -->
+ <!-- table noocommands edit -->
+ [#if VIEW_MODE="edit_noocommands"#]
+   [#inc noocommands_edit.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table noocommands edit -->
+ <!-- table noocommands view --> 
+ [#if VIEW_MODE="view_noocommands"#]
+   [#inc noocommands_view.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table noocommands view -->
+ [#endif DATA_SOURCE#]
