@@ -335,6 +335,7 @@ function usual(&$out) {
    if ($total) {
     for($i=0;$i<$total;$i++) {
      //to-do
+     $api_command='';
      $cmdline='';
      if ($commands[$i]['COMMAND_ID']=='102') { //switch on/off
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
@@ -343,7 +344,6 @@ function usual(&$out) {
        } else {
         $api_command='-off_ch'.$commands[$i]['ADDRESS'];
        }
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
       }
      } elseif ($this->config['API_TYPE']=='linux') {
       if ($value) {
@@ -351,17 +351,14 @@ function usual(&$out) {
       } else {
        $api_command='--off '.$commands[$i]['ADDRESS'];
       }
-      $cmdline='noolitepc '.$api_command;
      }
 
      if ($commands[$i]['COMMAND_ID']=='103') { //dimmer brightness
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_ch'.$commands[$i]['ADDRESS'].' -'.$value;
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
       }
      } elseif ($this->config['API_TYPE']=='linux') {
       $api_command='--set '.$commands[$i]['ADDRESS'].' '.$value;
-      $cmdline='noolitepc '.$api_command;
      }
 
      if ($commands[$i]['COMMAND_ID']=='104') { //rgb
@@ -371,10 +368,8 @@ function usual(&$out) {
       $b=(int)$tmp[2];
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_color_ch'.$commands[$i]['ADDRESS'].' -'.$r.' -'.$g.' -'.$b;
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--color '.$commands[$i]['ADDRESS'].' '.$r.' '.$g.' '.$b;
-       $cmdline='noolitepc '.$api_command;
       }
      }
 
@@ -385,7 +380,6 @@ function usual(&$out) {
        } else {
         $api_command='-stop_reg_ch'.$commands[$i]['ADDRESS'];
        }
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
       }
      }
 
@@ -394,7 +388,6 @@ function usual(&$out) {
        if ($value) {
         $api_command='-speed_mode_sw_ch'.$commands[$i]['ADDRESS'];
        }
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
       }
      }
 
@@ -403,7 +396,18 @@ function usual(&$out) {
        if ($value) {
         $api_command='-sw_mode_ch'.$commands[$i]['ADDRESS'];
        }
-       $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
+      }
+     }
+
+     if ($api_command) {
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       if (file_exists("c:\Program Files\nooLite\nooLite.exe")) {
+        $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
+       } elseif (file_exists("c:\Program Files (x86)\nooLite\nooLite.exe")) {
+        $cmdline='"c:\Program Files (x86)\nooLite\nooLite.exe" -api '.$api_command;
+       }
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $cmdline='noolitepc '.$api_command;
       }
      }
 
