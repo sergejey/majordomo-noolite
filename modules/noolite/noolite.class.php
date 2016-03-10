@@ -331,6 +331,7 @@ function usual(&$out) {
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
    $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
+   DebMes("nooCommand: $object.$property");
    $total=count($commands);
    if ($total) {
     for($i=0;$i<$total;$i++) {
@@ -344,21 +345,21 @@ function usual(&$out) {
        } else {
         $api_command='-off_ch'.$commands[$i]['ADDRESS'];
        }
-      }
-     } elseif ($this->config['API_TYPE']=='linux') {
-      if ($value) {
-       $api_command='--on '.$commands[$i]['ADDRESS'];
-      } else {
-       $api_command='--off '.$commands[$i]['ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='linux') {
+       if ($value) {
+        $api_command='--on '.$commands[$i]['ADDRESS'];
+       } else {
+        $api_command='--off '.$commands[$i]['ADDRESS'];
+       }
       }
      }
 
      if ($commands[$i]['COMMAND_ID']=='103') { //dimmer brightness
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_ch'.$commands[$i]['ADDRESS'].' -'.$value;
-      }
-     } elseif ($this->config['API_TYPE']=='linux') {
+      } elseif ($this->config['API_TYPE']=='linux') {
       $api_command='--set '.$commands[$i]['ADDRESS'].' '.$value;
+      }
      }
 
      if ($commands[$i]['COMMAND_ID']=='104') { //rgb
