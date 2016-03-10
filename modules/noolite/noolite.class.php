@@ -339,10 +339,10 @@ function usual(&$out) {
  function sendAPICommand($api_command) {
   $cmdline='';
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
-       if (file_exists("c:\Program Files\nooLite\nooLite.exe")) {
-        $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
-       } elseif (file_exists("c:\Program Files (x86)\nooLite\nooLite.exe")) {
-        $cmdline='"c:\Program Files (x86)\nooLite\nooLite.exe" -api '.$api_command;
+       if (file_exists("c:/Program Files/nooLite/nooLite.exe")) {
+        $cmdline='"c:/Program Files/nooLite/nooLite.exe" -api '.$api_command;
+       } elseif (file_exists("c:/Program Files (x86)/nooLite/nooLite.exe")) {
+        $cmdline='"c:/Program Files (x86)/nooLite/nooLite.exe" -api '.$api_command;
        } else {
         DebMes("Noolite App not found");
        }
