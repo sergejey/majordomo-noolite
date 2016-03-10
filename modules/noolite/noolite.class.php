@@ -328,6 +328,29 @@ function usual(&$out) {
  function edit_noocommands(&$out, $id) {
   require(DIR_MODULES.$this->name.'/noocommands_edit.inc.php');
  }
+
+
+ function sendAPICommand($api_command) {
+  $cmdline='';
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       if (file_exists("c:\Program Files\nooLite\nooLite.exe")) {
+        $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
+       } elseif (file_exists("c:\Program Files (x86)\nooLite\nooLite.exe")) {
+        $cmdline='"c:\Program Files (x86)\nooLite\nooLite.exe" -api '.$api_command;
+       } else {
+        DebMes("Noolite App not found");
+       }
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $cmdline='noolitepc '.$api_command;
+      }
+
+     if ($cmdline) {
+      DebMes("Noolite cmd: ".$cmdline);
+      safe_exec($cmdline);
+     }
+
+ }
+
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
    $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
@@ -401,22 +424,9 @@ function usual(&$out) {
      }
 
      if ($api_command) {
-      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
-       if (file_exists("c:\Program Files\nooLite\nooLite.exe")) {
-        $cmdline='"c:\Program Files\nooLite\nooLite.exe" -api '.$api_command;
-       } elseif (file_exists("c:\Program Files (x86)\nooLite\nooLite.exe")) {
-        $cmdline='"c:\Program Files (x86)\nooLite\nooLite.exe" -api '.$api_command;
-       }
-      } elseif ($this->config['API_TYPE']=='linux') {
-       $cmdline='noolitepc '.$api_command;
-      }
+      $this->sendAPICommand($api_command);
      }
 
-
-     if ($cmdline) {
-      DebMes("Noolite cmd: ".$cmdline);
-      safe_exec($cmdline);
-     }
 
       unset($commands[$i]['ADDRESS']);
       $commands[$i]['UPDATED']=date('Y-m-d H:i:s');

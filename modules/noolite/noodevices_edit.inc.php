@@ -2,11 +2,62 @@
 /*
 * @version 0.1 (wizard)
 */
+   $this->getConfig();
+
   if ($this->owner->name=='panel') {
    $out['CONTROLPANEL']=1;
   }
   $table_name='noodevices';
   $rec=SQLSelectOne("SELECT * FROM $table_name WHERE ID='$id'");
+
+  $ch=preg_replace('/\D/', '', $rec['ADDRESS']);
+
+
+  if ($this->mode=='start_binding' && $ch!='') {
+   $out['MESSAGE']='Starting binding mode on channel #'.$ch;
+   if ($this->config['API_TYPE']=='linux') {
+    $api_command='--bind '.$ch;
+    $cmdline='nooliterxcfg '.$api_command;
+    safe_exec($cmdline);
+   }
+  }
+
+  if ($this->mode=='stop_binding' && $ch!='') {
+   $out['MESSAGE']='Stopping binding mode on channel #'.$ch;
+   if ($this->config['API_TYPE']=='linux') {
+    $api_command='--stop '.$ch;
+    $cmdline='nooliterxcfg '.$api_command;
+    safe_exec($cmdline);
+   }
+  }
+
+
+
+  if ($this->mode=='bind' && $ch!='') {
+   $out['MESSAGE']='Bind command sent for channel #'.$ch;
+
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       $api_command='-bind_'.$ch;
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $api_command='--bind '.$ch;
+      }
+      $this->sendAPICommand($api_command);
+  }
+
+  if ($this->mode=='unbind' && $ch!='') {
+   $out['MESSAGE']='Un-bind command sent for channel #'.$ch;
+
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       $api_command='-unbind_'.$ch;
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $api_command='--unbind '.$ch;
+      }
+      $this->sendAPICommand($api_command);
+
+
+  }
+
+
   if ($this->mode=='update') {
    $ok=1;
   // step: default
@@ -139,3 +190,5 @@
    }
   }
   outHash($rec, $out);
+
+  $out['API_TYPE']=$this->config['API_TYPE'];
