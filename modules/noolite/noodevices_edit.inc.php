@@ -154,6 +154,7 @@
     SQLExec("DELETE FROM noocommands WHERE ID='".(int)$delete_id."'");
    }
    $properties=SQLSelect("SELECT * FROM noocommands WHERE DEVICE_ID='".$rec['ID']."' ORDER BY ID");
+   $scripts=SQLSelect("SELECT ID, TITLE FROM scripts ORDER BY TITLE");
    $total=count($properties);
    for($i=0;$i<$total;$i++) {
     if ($properties[$i]['ID']==$new_id) continue;
@@ -167,6 +168,10 @@
       global ${'linked_method'.$properties[$i]['ID']};
       $properties[$i]['LINKED_METHOD']=trim(${'linked_method'.$properties[$i]['ID']});
 
+      global ${'script_id'.$properties[$i]['ID']};
+      $properties[$i]['SCRIPT_ID']=(int)(${'script_id'.$properties[$i]['ID']});
+
+
       unset($properties[$i]['UPDATED']);
 
       SQLUpdate('noocommands', $properties[$i]);
@@ -178,6 +183,9 @@
       if ($properties[$i]['LINKED_OBJECT'] && $properties[$i]['LINKED_PROPERTY']) {
        addLinkedProperty($properties[$i]['LINKED_OBJECT'], $properties[$i]['LINKED_PROPERTY'], $this->name);
       }
+     }
+     if ($rec['DEVICE_TYPE']=='') {
+      $properties[$i]['SCRIPTS']=&$scripts;
      }
    }
    $out['PROPERTIES']=$properties;   

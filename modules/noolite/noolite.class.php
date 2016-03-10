@@ -255,6 +255,12 @@ function usual(&$out) {
    callMethod($command['LINKED_OBJECT'].'.'.$command['LINKED_METHOD'], $params);
   }
 
+  if ($command['SCRIPT_ID']) {
+   $params['VALUE']=$command['VALUE'];
+   $params['value']=$command['VALUE'];
+   runScript($command['SCRIPT_ID'], $params);
+  }
+
   if ($command_id2) {
 
    $command_id=$command_id2;
@@ -487,6 +493,7 @@ noocommands -
  noocommands: LINKED_OBJECT varchar(100) NOT NULL DEFAULT ''
  noocommands: LINKED_PROPERTY varchar(100) NOT NULL DEFAULT ''
  noocommands: LINKED_METHOD varchar(100) NOT NULL DEFAULT ''
+ noocommands: SCRIPT_ID int(10) NOT NULL DEFAULT '0'
  noocommands: UPDATED datetime
 EOD;
   parent::dbInstall($data);
