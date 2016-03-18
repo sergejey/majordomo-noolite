@@ -25,9 +25,10 @@
 
 <div class="form-group">
  <label class="col-lg-3 control-label"[#if ERR_ADDRESS#] style="color:red;font-weight:bold"[#endif#]>
- ADDR/CH:
+ <#LANG_CHANNEL#>:
  </label>
- <div class="col-lg-4"><input type="text" class="form-control" name="address" value="[#ADDRESS#]" id="address">
+ <div class="col-lg-4">
+ <input type="text" class="form-control" name="address" value="[#ADDRESS#]" id="address">
  [#if ID!=""#]
  [#if DEVICE_TYPE=="power" || DEVICE_TYPE=="power_dimmer" || DEVICE_TYPE=="power_rgb"#]
  <br/>

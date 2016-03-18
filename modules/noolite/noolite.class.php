@@ -198,7 +198,7 @@ function usual(&$out) {
    return;
   }
 
-  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE ADDRESS LIKE '".DBSafe($addr)."'");
+  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE (ADDRESS LIKE '".DBSafe($addr)."' OR ADDRESS='".(int)preg_replace('/\D/', '', $addr)."') AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor')");
   if (!$rec['ID']) {
    $rec['ADDRESS']=$addr;
    $rec['TITLE']=$title;
