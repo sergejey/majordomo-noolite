@@ -16,7 +16,7 @@
    $session->data['noodevices_qry']=$qry;
   }
   if (!$qry) $qry="1";
-  $sortby_noodevices="TITLE";
+  $sortby_noodevices="DEVICE_TYPE, ADDRESS, TITLE";
   $out['SORTBY']=$sortby_noodevices;
   // SEARCH RESULTS
   $res=SQLSelect("SELECT * FROM noodevices WHERE $qry ORDER BY ".$sortby_noodevices);
