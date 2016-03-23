@@ -1,6 +1,9 @@
 
 <!-- Table 'noodevices' edit -->
 <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+[#if MESSAGE!=""#]
+<div class="alert alert-success">[#MESSAGE#]</div>
+[#endif MESSAGE#]
 [#if OK#]
 <div class="alert alert-success"><#LANG_DATA_SAVED#></div>
 [#endif OK#]
@@ -36,6 +39,7 @@
    [#if COMMAND_ID="5"#]Long press (start)[#endif#]
    [#if COMMAND_ID="10"#]Long press (stop)[#endif#]
    [#if COMMAND_ID="7"#]LoadPreset[#endif#]
+   [#if COMMAND_ID="8"#]SavePreset[#endif#]
    [#if COMMAND_ID="15"#]Bind[#endif#]
    [#if COMMAND_ID="17"#]SwitchColor[#endif#]
    [#if COMMAND_ID="18"#]SwitchMode[#endif#]

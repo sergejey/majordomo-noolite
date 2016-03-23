@@ -288,6 +288,49 @@ function usual(&$out) {
 
   }
 
+  if ($command_id=='7') {
+   //load preset
+   $commands=SQLSelect("SELECT noocommands.*, nooscenarios.VALUE as SCENE_VALUE FROM nooscenarios LEFT JOIN noocommands ON nooscenarios.COMMAND_ID=noocommands.ID WHERE nooscenarios.MASTER_DEVICE_ID='".$rec['ID']."' AND nooscenarios.COMMAND_ID>0");
+   $total=count($commands);
+   for($i=0;$i<$total;$i++) {
+    if (!$commands[$i]['ID']) {
+     continue;
+    }
+    if ($commands[$i]['LINKED_OBJECT'] && $commands[$i]['LINKED_PROPERTY']) {
+     setGlobal($commands[$i]['LINKED_OBJECT'].'.'.$commands[$i]['LINKED_PROPERTY'], $commands[$i]['SCENE_VALUE'], array($this->name=>'0'));
+     $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
+    }
+    $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
+    $commands[$i]['UPDATED']=date('Y-m-d H:i:s');
+    unset($commands[$i]['SCENE_VALUE']);
+    SQLUpdate('noocommands', $commands[$i]);
+   }
+
+   if ($rec['SCENARIO_ADDRESS']) {
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+        $api_command='-load_preset_ch'.$rec['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='linux') {
+        $api_command='--load '.$rec['SCENARIO_ADDRESS'];
+      }
+      $this->sendAPICommand($api_command);
+   }
+
+
+  }
+
+  if ($command_id=='8') {
+   //save preset
+   $scenarios=SQLSelect("SELECT * FROM nooscenarios WHERE MASTER_DEVICE_ID='".$rec['ID']."'");
+   $total=count($scenarios);
+   for($i=0;$i<$total;$i++) {
+    $linked_command=SQLSelectOne("SELECT * FROM noocommands WHERE DEVICE_ID='".$scenarios[$i]['DEVICE_ID']."' AND (COMMAND_ID='102' OR COMMAND_ID='103')");
+    if ($linked_command['ID']) {
+     $scenarios[$i]['VALUE']=$linked_command['VALUE'];
+     $scenarios[$i]['COMMAND_ID']=$linked_command['ID'];
+     SQLUpdate('nooscenarios', $scenarios[$i]);
+    }
+   }
+  }
   echo "OK";
  }
 }
@@ -338,6 +381,7 @@ function usual(&$out) {
 
  function sendAPICommand($api_command) {
   $cmdline='';
+
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        if (file_exists("c:/Program Files/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files/nooLite/nooLite.exe" -api '.$api_command;
@@ -351,15 +395,25 @@ function usual(&$out) {
       }
 
      if ($cmdline) {
-      DebMes("Noolite cmd: ".$cmdline);
-      safe_exec($cmdline);
+      $latest_command_sent=(int)getGlobal('ThisComputer.LatestNooliteCommand');
+      $diff=$latest_command_sent-time();
+      if ($diff<0) {
+       DebMes("Noolite instant cmd: ".$cmdline);
+       setGlobal('ThisComputer.LatestNooliteCommand', time());
+       safe_exec($cmdline);
+      } else {
+       $diff=$diff+1;
+       DebMes("Noolite delayed (".($diff).") cmd: ".$cmdline); 
+       setGlobal('ThisComputer.LatestNooliteCommand', time()+$diff);
+       setTimeOut('noocommand'.md5($cmdline), 'safe_exec("'.$cmdline.'");', $diff);
+      }
      }
 
  }
 
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
-   $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
+   $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
    DebMes("nooCommand: $object.$property");
    $total=count($commands);
    if ($total) {
@@ -367,6 +421,32 @@ function usual(&$out) {
      //to-do
      $api_command='';
      $cmdline='';
+
+     if ($commands[$i]['COMMAND_ID']=='7' && $value && $commands[$i]['SCENARIO_ADDRESS']) { //load preset
+
+      $commands=SQLSelect("SELECT noocommands.*, nooscenarios.VALUE as SCENE_VALUE FROM nooscenarios LEFT JOIN noocommands ON nooscenarios.COMMAND_ID=noocommands.ID WHERE nooscenarios.MASTER_DEVICE_ID='".$commands[$i]['DEVICE_ID']."' AND nooscenarios.COMMAND_ID>0");
+      $total=count($commands);
+      for($i=0;$i<$total;$i++) {
+       if (!$commands[$i]['ID']) {
+             continue;
+       }
+       if ($commands[$i]['LINKED_OBJECT'] && $commands[$i]['LINKED_PROPERTY']) {
+             setGlobal($commands[$i]['LINKED_OBJECT'].'.'.$commands[$i]['LINKED_PROPERTY'], $commands[$i]['SCENE_VALUE'], array($this->name=>'0'));
+             $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
+       }
+       $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
+       $commands[$i]['UPDATED']=date('Y-m-d H:i:s');
+       unset($commands[$i]['SCENE_VALUE']);
+       SQLUpdate('noocommands', $commands[$i]);
+      }
+
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+        $api_command='-load_preset_ch'.$commands[$i]['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='linux') {
+        $api_command='--load '.$commands[$i]['SCENARIO_ADDRESS'];
+      }
+     }
+
      if ($commands[$i]['COMMAND_ID']=='102') { //switch on/off
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        if ($value) {
@@ -435,6 +515,7 @@ function usual(&$out) {
 
 
       unset($commands[$i]['ADDRESS']);
+      unset($commands[$i]['SCENARIO_ADDRESS']);
       $commands[$i]['UPDATED']=date('Y-m-d H:i:s');
       $commands[$i]['VALUE']=$value;
       SQLUpdate('noocommands', $commands[$i]);
@@ -483,6 +564,7 @@ noocommands -
  noodevices: TITLE varchar(100) NOT NULL DEFAULT ''
  noodevices: DEVICE_TYPE varchar(255) NOT NULL DEFAULT ''
  noodevices: ADDRESS varchar(255) NOT NULL DEFAULT ''
+ noodevices: SCENARIO_ADDRESS varchar(255) NOT NULL DEFAULT ''
  noodevices: UPDATED datetime
 
  noocommands: ID int(10) unsigned NOT NULL auto_increment
@@ -495,6 +577,14 @@ noocommands -
  noocommands: LINKED_METHOD varchar(100) NOT NULL DEFAULT ''
  noocommands: SCRIPT_ID int(10) NOT NULL DEFAULT '0'
  noocommands: UPDATED datetime
+
+ nooscenarios: ID int(10) unsigned NOT NULL auto_increment
+ nooscenarios: MASTER_DEVICE_ID int(10) NOT NULL DEFAULT '0'
+ nooscenarios: DEVICE_ID int(10) NOT NULL DEFAULT '0'
+ nooscenarios: COMMAND_ID int(10) NOT NULL DEFAULT '0'
+ nooscenarios: VALUE varchar(255) NOT NULL DEFAULT ''
+
+
 EOD;
   parent::dbInstall($data);
  }

@@ -1,0 +1,68 @@
+
+<!-- Table 'noodevices' edit -->
+<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+[#if MESSAGE!=""#]
+<div class="alert alert-success">[#MESSAGE#]</div>
+[#endif MESSAGE#]
+[#if OK#]
+<div class="alert alert-success"><#LANG_DATA_SAVED#></div>
+[#endif OK#]
+[#if ERR#]
+<div class="alert alert-error"><#LANG_FILLOUT_REQURED#></div>
+[#endif ERR#]
+<fieldset>
+<div class="form-group">
+
+<div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_SCENARIO_ADDRESS#] style="color:red;font-weight:bold"[#endif#]>
+ Канал передатчика для сцены:
+ (*)
+ </label>
+ <div class="col-lg-4"><input type="text" class="form-control" name="scenario_address" value="[#SCENARIO_ADDRESS#]" id="scenario_address"></div>
+</div>
+
+
+<div>
+<table class="table table-stripped">
+ <tr>
+  <th><#LANG_CHANNEL#></th>
+  <th><#LANG_DEVICE#></th>
+  <th><#LANG_VALUE#></th>
+  <th>&nbsp;</th>
+ </tr>
+ [#begin DEVICES#]
+ <tr>
+  <td valign="top"><input type="checkbox" name="linked[#ID#]" id="linked[#ID#]" value="1"[#if LINKED="1"#] checked[#endif#]>
+  [#ADDRESS#]
+  </td>
+  <td valign="top"><a href="?id=[#ID#]&view_mode=edit_noodevices">[#TITLE#]</a></td>
+  <td valign="top">[#LINKED_VALUE#]</td>
+  <td valign="top">
+   [#if LINKED="1"#]
+   <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&tab=<#TAB#>&bind_id=[#ID#]&mode=autobind" class="btn btn-default">Auto-bind</a>
+   [#else#]
+   &nbsp;
+   [#endif#]
+  </td>
+ </tr>
+ [#end DEVICES#]
+</table> 
+</div>
+</div>
+<div class="form-group">
+        <div class="col-lg-offset-3 col-lg-4">
+ <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_SUBMIT#></button>
+ <a href="?data_source=<#DATA_SOURCE#>" class="btn btn-default "><#LANG_CANCEL#></a>
+<input type="hidden" name="id" value="<#ID#>">
+<input type="hidden" name="view_mode" value="<#VIEW_MODE#>">
+<input type="hidden" name="edit_mode" value="<#EDIT_MODE#>">
+<input type="hidden" name="mode" value="update">
+<input type="hidden" name="data_source" value="<#DATA_SOURCE#>">
+<input type="hidden" name="tab" value="<#TAB#>">
+        </div>
+</div>
+</fieldset>
+</form>
+<!-- dataset2 (module) -->
+<div class="form-group">
+</div>

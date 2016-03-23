@@ -79,6 +79,11 @@ timeout = 250</pre>
   <li[#if TAB="data"#] class="active"[#endif#]>
    <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
   </li>
+  [#if SHOW_SCENE="1"#]
+  <li[#if TAB="scenarios"#] class="active"[#endif#]>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=scenarios">&#060#LANG_SCENE#&#062</a>
+  </li>
+  [#endif SHOW_SCENE#]
 </ul>
 &nbsp;<br/>
    [#endif ID#]
@@ -88,6 +93,10 @@ timeout = 250</pre>
    [#if TAB="data"#]
     [#inc noodevices_edit_data.html#]
    [#endif TAB#]
+   [#if TAB="scenarios"#]
+    [#inc noodevices_edit_scenarios.html#]
+   [#endif TAB#]
+
  [#endif VIEW_MODE#]
  <!-- / table noodevices edit -->
  <!-- table noodevices view --> 

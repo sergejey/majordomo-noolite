@@ -12,6 +12,39 @@
 
   $ch=preg_replace('/\D/', '', $rec['ADDRESS']);
 
+  if ($this->mode=='autobind' && (int)$rec['SCENARIO_ADDRESS']) {
+   global $bind_id;
+   $original=SQLSelectOne("SELECT * FROM noodevices WHERE ID='".(int)$bind_id."'");
+   $original_ch=preg_replace('/\D/', '', $original['ADDRESS']);
+   if ($original_ch) {
+    $msg="Auto-binding to ".(int)$rec['SCENARIO_ADDRESS']." originally binded to $original_ch";
+    //1. Send bind from Original Channel
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       $api_command='-bind_'.$original_ch;
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $api_command='--bind '.$original_ch;
+      }
+      $this->sendAPICommand($api_command);
+      sleep(2);
+    //2. Send bind from New channel
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       $api_command='-bind_'.(int)$rec['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $api_command='--bind '.(int)$rec['SCENARIO_ADDRESS'];
+      }
+      $this->sendAPICommand($api_command);
+      sleep(2);
+    //3. Send bind from New channel
+      if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+       $api_command='-bind_'.(int)$rec['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='linux') {
+       $api_command='--bind '.(int)$rec['SCENARIO_ADDRESS'];
+      }
+      $this->sendAPICommand($api_command);
+
+     $out['MESSAGE']=$msg;
+   }
+  }
 
   if ($this->mode=='start_binding' && $ch!='') {
    $out['MESSAGE']='Starting binding mode on channel #'.$ch;
@@ -80,6 +113,13 @@
   // step: data
   if ($this->tab=='data') {
   }
+  // step: scenarios
+  if ($this->tab=='scenarios') {
+   global $scenario_address;
+   $rec['SCENARIO_ADDRESS']=(int)$scenario_address;
+  }
+
+
   //UPDATING RECORD
    if ($ok) {
     if ($rec['ID']) {
@@ -143,6 +183,41 @@
   // step: default
   if ($this->tab=='') {
   }
+
+  if ($this->tab=='scenarios') {
+   $devices=SQLSelect("SELECT * FROM noodevices WHERE (DEVICE_TYPE='power' OR DEVICE_TYPE='power_dimmer') ORDER BY ADDRESS, TITLE");
+
+   $total=count($devices);
+   for($i=0;$i<$total;$i++) {
+
+    if ($this->mode=='update') {
+     global ${"linked".$devices[$i]['ID']};
+
+
+     $old_rec=SQLSelectOne("SELECT * FROM nooscenarios WHERE MASTER_DEVICE_ID='".$rec['ID']."' AND DEVICE_ID='".$devices[$i]['ID']."'");
+     SQLExec("DELETE FROM nooscenarios WHERE MASTER_DEVICE_ID='".$rec['ID']."' AND DEVICE_ID='".$devices[$i]['ID']."'");
+
+     if (${"linked".$devices[$i]['ID']}) {
+      unset($old_rec['ID']);
+      $old_rec['MASTER_DEVICE_ID']=$rec['ID'];
+      $old_rec['DEVICE_ID']=$devices[$i]['ID'];
+      SQLInsert('nooscenarios', $old_rec);
+     }
+
+    }
+
+    $linked=SQLSelectOne("SELECT ID, VALUE FROM nooscenarios WHERE MASTER_DEVICE_ID='".$rec['ID']."' AND DEVICE_ID='".$devices[$i]['ID']."'");
+    if ($linked['ID']) {
+     $devices[$i]['LINKED']=1;
+     $devices[$i]['LINKED_VALUE']=$linked['VALUE'];
+    }
+   }
+   if ($this->mode=='update') {
+   }
+   $out['DEVICES']=$devices;
+  }
+
+
   // step: data
   if ($this->tab=='data') {
   }
@@ -198,5 +273,9 @@
    }
   }
   outHash($rec, $out);
+
+  if ($rec['ID'] && current(SQLSelectOne("SELECT ID FROM noocommands WHERE (COMMAND_ID=7 OR COMMAND_ID=8) AND DEVICE_ID='".$rec['ID']."'"))) {
+   $out['SHOW_SCENE']=1;
+  }
 
   $out['API_TYPE']=$this->config['API_TYPE'];
