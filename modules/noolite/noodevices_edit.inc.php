@@ -274,8 +274,11 @@
   }
   outHash($rec, $out);
 
-  if ($rec['ID'] && current(SQLSelectOne("SELECT ID FROM noocommands WHERE (COMMAND_ID=7 OR COMMAND_ID=8) AND DEVICE_ID='".$rec['ID']."'"))) {
-   $out['SHOW_SCENE']=1;
+  if ($rec['ID']) {
+   $tmp=SQLSelectOne("SELECT ID FROM noocommands WHERE (COMMAND_ID=7 OR COMMAND_ID=8) AND DEVICE_ID='".$rec['ID']."'");
+   if ($tmp['ID']) {
+    $out['SHOW_SCENE']=1;
+   }
   }
 
   $out['API_TYPE']=$this->config['API_TYPE'];

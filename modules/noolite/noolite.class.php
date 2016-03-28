@@ -424,20 +424,20 @@ function usual(&$out) {
 
      if ($commands[$i]['COMMAND_ID']=='7' && $value && $commands[$i]['SCENARIO_ADDRESS']) { //load preset
 
-      $commands=SQLSelect("SELECT noocommands.*, nooscenarios.VALUE as SCENE_VALUE FROM nooscenarios LEFT JOIN noocommands ON nooscenarios.COMMAND_ID=noocommands.ID WHERE nooscenarios.MASTER_DEVICE_ID='".$commands[$i]['DEVICE_ID']."' AND nooscenarios.COMMAND_ID>0");
-      $total=count($commands);
-      for($i=0;$i<$total;$i++) {
-       if (!$commands[$i]['ID']) {
+      $commands_linked=SQLSelect("SELECT noocommands.*, nooscenarios.VALUE as SCENE_VALUE FROM nooscenarios LEFT JOIN noocommands ON nooscenarios.COMMAND_ID=noocommands.ID WHERE nooscenarios.MASTER_DEVICE_ID='".$commands[$i]['DEVICE_ID']."' AND nooscenarios.COMMAND_ID>0");
+      $total2=count($commands_linked);
+      for($i2=0;$i2<$total2;$i2++) {
+       if (!$commands_linked[$i2]['ID']) {
              continue;
        }
-       if ($commands[$i]['LINKED_OBJECT'] && $commands[$i]['LINKED_PROPERTY']) {
-             setGlobal($commands[$i]['LINKED_OBJECT'].'.'.$commands[$i]['LINKED_PROPERTY'], $commands[$i]['SCENE_VALUE'], array($this->name=>'0'));
-             $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
+       if ($commands_linked[$i2]['LINKED_OBJECT'] && $commands_linked[$i2]['LINKED_PROPERTY']) {
+             setGlobal($commands_linked[$i2]['LINKED_OBJECT'].'.'.$commands_linked[$i2]['LINKED_PROPERTY'], $commands_linked[$i2]['SCENE_VALUE'], array($this->name=>'0'));
+             $commands_linked[$i2]['VALUE']=$commands_linked[$i2]['SCENE_VALUE'];
        }
-       $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
-       $commands[$i]['UPDATED']=date('Y-m-d H:i:s');
-       unset($commands[$i]['SCENE_VALUE']);
-       SQLUpdate('noocommands', $commands[$i]);
+       $commands_linked[$i2]['VALUE']=$commands_linked[$i2]['SCENE_VALUE'];
+       $commands_linked[$i2]['UPDATED']=date('Y-m-d H:i:s');
+       unset($commands_linked[$i2]['SCENE_VALUE']);
+       SQLUpdate('noocommands', $commands_linked[$i2]);
       }
 
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
