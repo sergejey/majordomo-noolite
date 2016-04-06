@@ -332,6 +332,7 @@ function usual(&$out) {
    }
   }
   echo "OK";
+
  }
 }
 /**
@@ -381,7 +382,7 @@ function usual(&$out) {
 
  function sendAPICommand($api_command) {
   $cmdline='';
-
+  startMeasure('noolite_sendapi');
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        if (file_exists("c:/Program Files/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files/nooLite/nooLite.exe" -api '.$api_command;
@@ -391,7 +392,7 @@ function usual(&$out) {
         DebMes("Noolite App not found");
        }
       } elseif ($this->config['API_TYPE']=='linux') {
-       $cmdline='noolitepc '.$api_command;
+       $cmdline='sudo noolitepc '.$api_command;
       }
 
      if ($cmdline) {
@@ -400,15 +401,15 @@ function usual(&$out) {
       if ($diff<0) {
        DebMes("Noolite instant cmd: ".$cmdline);
        setGlobal('ThisComputer.LatestNooliteCommand', time());
-       safe_exec($cmdline);
+       exec($cmdline);
       } else {
        $diff=$diff+1;
        DebMes("Noolite delayed (".($diff).") cmd: ".$cmdline); 
        setGlobal('ThisComputer.LatestNooliteCommand', time()+$diff);
-       setTimeOut('noocommand'.md5($cmdline), 'safe_exec("'.$cmdline.'");', $diff);
+       setTimeOut('noocommand'.md5($cmdline), 'exec("'.$cmdline.'");', $diff);
       }
      }
-
+   endMeasure('noolite_sendapi');
  }
 
  function propertySetHandle($object, $property, $value) {
