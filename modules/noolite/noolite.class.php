@@ -169,6 +169,12 @@ function admin(&$out) {
 * @access public
 */
 function usual(&$out) {
+
+
+ if ($out['module']) {
+  $this->ajax=1;
+ }
+
  if ($this->ajax) {
   //DebMes("noolite request: ".$_SERVER['REQUEST_URI']);
 
