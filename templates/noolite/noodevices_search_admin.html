@@ -26,10 +26,10 @@
 <table  align=center class="table table-striped">
 <tbody>
 <tr>
- <th><#LANG_CHANNEL#></th>
- <th><#LANG_TITLE#></th>
- <th><#LANG_TYPE#></th>
- <th><#LANG_UPDATED#></th>
+ <th><a href="?sortby=ADDRESS"><#LANG_CHANNEL#></a></th>
+ <th><a href="?sortby=TITLE"><#LANG_TITLE#></a></th>
+ <th><a href="?sortby=DEVICE_TYPE"><#LANG_TYPE#></a></th>
+ <th><a href="?sortby=UPDATED"><#LANG_UPDATED#></a></th>
  <th>&nbsp;</th>
 </tr>
 [#begin RESULT#]
@@ -40,6 +40,12 @@
   <b>
    [#TITLE#]
   </a></b>
+  [#if LINKED#]
+  <br/>
+  [#begin LINKED#]
+  <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_noodevices&id=<#RESULT.ID#>&tab=data">[#LINKED_OBJECT#].[#LINKED_PROPERTY#][#if LINKED_METHOD!=""#] ([#LINKED_METHOD#])[#endif#];</a>
+  [#end LINKED#]
+  [#endif LINKED#]
  </td>
  <td style="vertical-align:middle"
    >
