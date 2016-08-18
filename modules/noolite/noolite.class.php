@@ -178,12 +178,24 @@ function usual(&$out) {
  if ($this->ajax) {
   //DebMes("noolite request: ".$_SERVER['REQUEST_URI']);
 
+  $value=0;
   $this->getConfig();
-  if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+  DebMes('AJAX request: '.serialize($_GET));
+
+  if ($_GET['did']) {
+   $addr=$_GET['did'];
+   $command_id=hexdec($_GET['cmd']);
+   $title='Device '.$addr. ' (cmd: '.$command_id.')';
+   $d0=$_GET['d0'];
+   $d1=$_GET['d1'];
+   $d2=$_GET['d2'];
+   $d3=$_GET['d3'];
+   $t=trim($_GET['t']);
+   $rh=trim($_GET['rh']);
+  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
    $addr='cell'.$_GET['cell'];
    $title=$_GET['name'];
    $command_id=(int)$_GET['cmd'];
-   $value=0;
    $d0=$_GET['d0'];
    $d1=$_GET['d1'];
    $d2=$_GET['d2'];
@@ -192,7 +204,6 @@ function usual(&$out) {
    $addr='ch'.$_GET['channel'];
    $title='Channel '.$_GET['channel'];
    $command_id=(int)$_GET['command'];
-   $value=0;
    $d0=$_GET['d0'];
    $d1=$_GET['d1'];
    $d2=$_GET['d2'];
@@ -226,18 +237,26 @@ function usual(&$out) {
    $value='1';
   } elseif ($command_id==21) {
    $command_id=121;
-   $b1 =(int)str_replace('-','',$d0);
-   $b2 =(int)str_replace('-','',$d1);
-   $y_temp=256*($b2 & 15)+$b1;
-   if  (($b2 & 8) != 0 ) {
-    $y_temp=4096-$y_temp;
-    $value = -1*($y_temp)/10;
+   if (IsSet($t)) {
+    $value = $t;
    } else {
-    $value = $y_temp/10;
+    $b1 =(int)str_replace('-','',$d0);
+    $b2 =(int)str_replace('-','',$d1);
+    $y_temp=256*($b2 & 15)+$b1;
+    if  (($b2 & 8) != 0 ) {
+     $y_temp=4096-$y_temp;
+     $value = -1*($y_temp)/10;
+    } else {
+     $value = $y_temp/10;
+    }
    }
 
    $command_id2=122;
-   $value2=(int)str_replace('-','',$d2);
+   if (IsSet($rh) && $rh>0) {
+    $value2=$rh;
+   } else {
+    $value2=(int)str_replace('-','',$d2);
+   }
 
   }
 
@@ -282,7 +301,7 @@ function usual(&$out) {
    $command['UPDATED']=date('Y-m-d H:i:s');
    SQLUpdate('noocommands', $command);
    if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], array($this->name=>'0'));
+     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE']); //, array($this->name=>'0')
    }
    if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
     $params=array();
@@ -561,7 +580,7 @@ function usual(&$out) {
 *
 * @access private
 */
- function dbInstall($data) {
+ function dbInstall() {
 /*
 noodevices - 
 noocommands - 
