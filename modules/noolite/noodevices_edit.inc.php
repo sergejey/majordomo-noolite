@@ -49,18 +49,24 @@
   if ($this->mode=='start_binding' && $ch!='') {
    $out['MESSAGE']='Starting binding mode on channel #'.$ch;
    if ($this->config['API_TYPE']=='linux') {
-    $api_command='--bind '.$ch;
+    $api_command='bind '.$ch;
+    safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
+/*
     $cmdline='nooliterxcfg '.$api_command;
     safe_exec($cmdline);
+*/
    }
   }
 
   if ($this->mode=='stop_binding' && $ch!='') {
    $out['MESSAGE']='Stopping binding mode on channel #'.$ch;
    if ($this->config['API_TYPE']=='linux') {
-    $api_command='--stop '.$ch;
+    $api_command='stop '.$ch;
+    safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
+/*
     $cmdline='nooliterxcfg '.$api_command;
     safe_exec($cmdline);
+*/
    }
   }
 
