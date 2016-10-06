@@ -134,53 +134,57 @@
     } else {
      $new_rec=1;
      $rec['ID']=SQLInsert($table_name, $rec); // adding new record
-
-     if ($rec['DEVICE_TYPE']=='power' || $rec['DEVICE_TYPE']=='power_dimmer' || $rec['DEVICE_TYPE']=='power_rgb') {
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=102; //turn on/off
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-     }
-     if ($rec['DEVICE_TYPE']=='power_dimmer') {
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=103; //dim
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-     }
-     if ($rec['DEVICE_TYPE']=='power_rgb') {
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=104; //rgb
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=105; //roll color
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=106; //speed switch
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-
-      $command=array();
-      $command['DEVICE_ID']=$rec['ID'];
-      $command['COMMAND_ID']=107; //mode switch
-      $command['VALUE']=0;
-      SQLInsert('noocommands', $command);
-
-
-
-
-     }
-
-
     }
+
+       $commands=array();
+       if ($rec['DEVICE_TYPE']=='power' || $rec['DEVICE_TYPE']=='power_dimmer' || $rec['DEVICE_TYPE']=='power_rgb') {
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=102; //turn on/off
+           $command['VALUE']=0;
+           $commands[]=$command;
+       }
+       if ($rec['DEVICE_TYPE']=='power_dimmer') {
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=103; //dim
+           $command['VALUE']=0;
+           $commands[]=$command;
+       }
+       if ($rec['DEVICE_TYPE']=='power_rgb') {
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=104; //rgb
+           $command['VALUE']=0;
+           $commands[]=$command;
+
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=105; //roll color
+           $command['VALUE']=0;
+           $commands[]=$command;
+
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=106; //speed switch
+           $command['VALUE']=0;
+           $commands[]=$command;
+
+           $command=array();
+           $command['DEVICE_ID']=$rec['ID'];
+           $command['COMMAND_ID']=107; //mode switch
+           $command['VALUE']=0;
+           $commands[]=$command;
+       }
+
+       foreach($commands as $command) {
+           $tmp=SQLSelectOne("SELECT ID FROM noocommands WHERE DEVICE_ID=".$rec['ID']." AND COMMAND_ID=".$command['COMMAND_ID']);
+           if (!$tmp['ID']) {
+               SQLInsert('noocommands', $command);
+           }
+       }
+
+
     $out['OK']=1;
    } else {
     $out['ERR']=1;

@@ -440,7 +440,7 @@ function usual(&$out) {
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
    $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
-   DebMes("nooCommand: $object.$property");
+   //DebMes("nooCommand: $object.$property");
    $total=count($commands);
    if ($total) {
     for($i=0;$i<$total;$i++) {
@@ -499,9 +499,17 @@ function usual(&$out) {
 
      if ($commands[$i]['COMMAND_ID']=='104') { //rgb
       $tmp=explode('-', $value);
-      $r=(int)$tmp[0];
-      $g=(int)$tmp[1];
-      $b=(int)$tmp[2];
+      if (isset($tmp[1])) {
+       $r=(int)$tmp[0];
+       $g=(int)$tmp[1];
+       $b=(int)$tmp[2];
+      } else {
+       $tmp=str_replace('#','',$value);
+       $r=round(hexdec(substr($tmp,0,2))*100/256);
+       $g=round(hexdec(substr($tmp,2,2))*100/256);
+       $b=round(hexdec(substr($tmp,4,2))*100/256);
+       DebMes($tmp.'='."$r-$g-$b");
+      }
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_color_ch'.$commands[$i]['ADDRESS'].' -'.$r.' -'.$g.' -'.$b;
       } elseif ($this->config['API_TYPE']=='linux') {
