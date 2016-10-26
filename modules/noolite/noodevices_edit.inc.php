@@ -51,10 +51,6 @@
    if ($this->config['API_TYPE']=='linux') {
     $api_command='bind '.$ch;
     safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
-/*
-    $cmdline='nooliterxcfg '.$api_command;
-    safe_exec($cmdline);
-*/
    }
   }
 
@@ -79,6 +75,8 @@
        $api_command='-bind_'.$ch;
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--bind '.$ch;
+      } elseif ($this->config['API_TYPE']=='http') {
+       $api_command='CHANNEL:'.$ch.':15';
       }
       $this->sendAPICommand($api_command);
   }
@@ -90,6 +88,8 @@
        $api_command='-unbind_'.$ch;
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--unbind '.$ch;
+      } elseif ($this->config['API_TYPE']=='http') {
+       $api_command='CHANNEL:'.$ch.':9';
       }
       $this->sendAPICommand($api_command);
 

@@ -126,11 +126,17 @@ function admin(&$out) {
   $out['API_URL']='http://';
  }
  $out['API_TYPE']=$this->config['API_TYPE'];
+ $out['API_IGNORE']=$this->config['API_IGNORE'];
+ $out['API_BINDING']=$this->config['API_BINDING'];
  if ($this->view_mode=='update_settings') {
    global $api_url;
    $this->config['API_URL']=$api_url;
    global $api_type;
    $this->config['API_TYPE']=$api_type;
+   global $api_ignore;
+   $this->config['API_IGNORE']=(int)$api_ignore;
+   global $api_binding;
+   $this->config['API_BINDING']=(int)$api_binding;
    $this->saveConfig();
    $this->redirect("?");
  }
@@ -182,6 +188,39 @@ function usual(&$out) {
   $this->getConfig();
   DebMes('AJAX request: '.serialize($_GET));
 
+  if (preg_match('/^RECEIVED:(.+)/', $_GET['data'], $m)) {
+   $tmp=explode(':', $m[1]);
+   $_GET['did']=$tmp[0];
+   $_GET['cmd']=$tmp[1];
+   $command_id=hexdec($_GET['cmd']);
+   if ($tmp[3]!='') {
+    $tmp[3]=str_replace(';', '', $tmp[3]);
+   }
+
+   $ok=1;
+   if ($this->config['API_IGNORE']) {
+    $tmp=SQLSelectOne("SELECT ID FROM noodevices WHERE ADDRESS LIKE '".DBSafe($_GET['did'])."'");
+    if (!$tmp['ID']) {
+     $ok=0;
+    }
+   }
+   if ($this->config['API_BINDING'] && $command_id==15) {
+    $ok=1;
+   }
+
+   if (!$ok) {
+    return 0;
+   }
+
+   if ($command_id==21) {
+    $_GET['t']=str_replace('t=', '', $tmp[2]);
+    $_GET['rh']=str_replace('h=', '', $tmp[3]);
+   }
+
+
+
+  }
+
   if ($_GET['did']) {
    $addr=$_GET['did'];
    $command_id=hexdec($_GET['cmd']);
@@ -200,7 +239,7 @@ function usual(&$out) {
    $d1=$_GET['d1'];
    $d2=$_GET['d2'];
    $d3=$_GET['d3'];
-  } elseif ($this->config['API_TYPE']=='linux') {
+  } elseif ($this->config['API_TYPE']=='linux' && IsSet($_GET['channel'])) {
    $addr='ch'.$_GET['channel'];
    $title='Channel '.$_GET['channel'];
    $command_id=(int)$_GET['command'];
@@ -411,6 +450,10 @@ function usual(&$out) {
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        if (file_exists("c:/Program Files/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files/nooLite/nooLite.exe" -api '.$api_command;
+       } elseif ($this->config['API_TYPE']=='http' && $this->config['API_URL']) {
+        $url=$this->config['API_URL'].urlencode($api_command);
+        DebMes("Sending noo api request: ".$url);
+        $data=getURL($url, 0);
        } elseif (file_exists("c:/Program Files (x86)/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files (x86)/nooLite/nooLite.exe" -api '.$api_command;
        } else {
@@ -470,6 +513,8 @@ function usual(&$out) {
         $api_command='-load_preset_ch'.$commands[$i]['SCENARIO_ADDRESS'];
       } elseif ($this->config['API_TYPE']=='linux') {
         $api_command='--load '.$commands[$i]['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='http') {
+       $api_command='CHANNEL:'.$commands[$i]['SCENARIO_ADDRESS'].':7'; // ???
       }
      }
 
@@ -485,6 +530,12 @@ function usual(&$out) {
         $api_command='--on '.$commands[$i]['ADDRESS'];
        } else {
         $api_command='--off '.$commands[$i]['ADDRESS'];
+       }
+      } elseif ($this->config['API_TYPE']=='http') {
+       if ($value) {
+        $api_command='CHANNEL:'.$commands[$i]['ADDRESS'].':2';
+       } else {
+        $api_command='CHANNEL:'.$commands[$i]['ADDRESS'].':0';
        }
       }
      }

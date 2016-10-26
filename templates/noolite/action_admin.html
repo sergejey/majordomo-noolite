@@ -39,10 +39,36 @@ timeout = 250</pre>
  <input type="radio" name="api_type" value="windows"[#if API_TYPE="" || API_TYPE="windows"#] checked[#endif#]> Windows App
  &nbsp;&nbsp;&nbsp;
  <input type="radio" name="api_type" value="linux"[#if API_TYPE="linux"#] checked[#endif#]> Linux App
- <!---
  &nbsp;&nbsp;&nbsp;
- <input type="radio" name="api_type" value="ext"[#if API_TYPE="ext"#] checked[#endif#]> External
- #-->
+ <input type="radio" name="api_type" value="http"[#if API_TYPE="http"#] checked[#endif#]> HTTP-gate
+ </div>
+</div>
+
+<div class="form-group">
+ <label class="control-label">
+  HTTP-gate URL:
+ </label>
+ <div class="controls">
+  <input type="text" name="api_url" value="[#API_URL#]" class="form-control">
+ </div>
+</div>
+
+
+<div class="form-group">
+ <label class="control-label">
+  &nbsp;
+ </label>
+ <div class="controls">
+ <input type="checkbox" name="api_ignore" value="1"[#if API_IGNORE="1"#] checked[#endif#]> Ignore unknown devices (http-gate)
+ </div>
+</div>
+
+<div class="form-group">
+ <label class="control-label">
+  &nbsp;
+ </label>
+ <div class="controls">
+ <input type="checkbox" name="api_binding" value="1"[#if API_BINDING="1"#] checked[#endif#]> Auto-binding mode (http-gate)
  </div>
 </div>
 
