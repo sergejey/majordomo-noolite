@@ -198,12 +198,14 @@ function usual(&$out) {
    }
 
    $ok=1;
-   if ($this->config['API_IGNORE']) {
-    $tmp=SQLSelectOne("SELECT ID FROM noodevices WHERE ADDRESS LIKE '".DBSafe($_GET['did'])."'");
-    if (!$tmp['ID']) {
+   //if ($this->config['API_IGNORE']) {
+    $device_rec=SQLSelectOne("SELECT ID FROM noodevices WHERE ADDRESS LIKE '".DBSafe($_GET['did'])."'");
+    if (!$device_rec['ID']) {
+     DebMes("Data from unknown device: ".serialize($_GET));
      $ok=0;
     }
-   }
+   //}
+
    if ($this->config['API_BINDING'] && $command_id==15) {
     $ok=1;
    }
