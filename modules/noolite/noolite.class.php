@@ -311,7 +311,7 @@ function usual(&$out) {
   $command['UPDATED']=date('Y-m-d H:i:s');
   SQLUpdate('noocommands', $command);
   if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-    setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], array($this->name=>'0'));
+    setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE']); //, array($this->name=>'0')
   }
   if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
    $params=array();
