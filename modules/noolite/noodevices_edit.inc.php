@@ -269,6 +269,23 @@
        addLinkedProperty($properties[$i]['LINKED_OBJECT'], $properties[$i]['LINKED_PROPERTY'], $this->name);
       }
      }
+
+      if (file_exists(DIR_MODULES.'devices/devices.class.php')) {
+       if ($properties[$i]['COMMAND_ID']=='121') {
+           $properties[$i]['SDEVICE_TYPE']='sensor_temp';
+       } elseif ($properties[$i]['COMMAND_ID']=='122') {
+           $properties[$i]['SDEVICE_TYPE']='sensor_humidity';
+       } elseif ($properties[$i]['COMMAND_ID']=='25') {
+           $properties[$i]['SDEVICE_TYPE']='motion';
+       } elseif ($properties[$i]['COMMAND_ID']=='2' || $properties[$i]['COMMAND_ID']=='4' || $properties[$i]['COMMAND_ID']=='102') {
+           $properties[$i]['SDEVICE_TYPE']='relay';
+       } elseif ($properties[$i]['COMMAND_ID']=='7' || $properties[$i]['COMMAND_ID']=='8' || $properties[$i]['COMMAND_ID']=='17' || $properties[$i]['COMMAND_ID']=='18') {
+           $properties[$i]['SDEVICE_TYPE']='button';
+       } elseif ($properties[$i]['COMMAND_ID']!='15') {
+           $properties[$i]['SDEVICE_TYPE']='any';
+       }
+      }
+
      if ($rec['DEVICE_TYPE']=='') {
       $properties[$i]['SCRIPTS']=&$scripts;
      }

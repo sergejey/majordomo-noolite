@@ -311,7 +311,7 @@ function usual(&$out) {
   $command['UPDATED']=date('Y-m-d H:i:s');
   SQLUpdate('noocommands', $command);
   if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-    setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE']); //, array($this->name=>'0')
+    setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
   }
   if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
    $params=array();
@@ -342,7 +342,7 @@ function usual(&$out) {
    $command['UPDATED']=date('Y-m-d H:i:s');
    SQLUpdate('noocommands', $command);
    if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE']); //, array($this->name=>'0')
+     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
    }
    if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
     $params=array();
@@ -363,7 +363,7 @@ function usual(&$out) {
      continue;
     }
     if ($commands[$i]['LINKED_OBJECT'] && $commands[$i]['LINKED_PROPERTY']) {
-     setGlobal($commands[$i]['LINKED_OBJECT'].'.'.$commands[$i]['LINKED_PROPERTY'], $commands[$i]['SCENE_VALUE'], array($this->name=>'0'));
+     setGlobal($commands[$i]['LINKED_OBJECT'].'.'.$commands[$i]['LINKED_PROPERTY'], $commands[$i]['SCENE_VALUE'], array($this->name=>'0'), $this->name);
      $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
     }
     $commands[$i]['VALUE']=$commands[$i]['SCENE_VALUE'];
@@ -470,13 +470,13 @@ function usual(&$out) {
       $diff=$latest_command_sent-time();
       if ($diff<0) {
        DebMes("Noolite instant cmd: ".$cmdline);
-       setGlobal('ThisComputer.LatestNooliteCommand', time());
+       setGlobal('ThisComputer.LatestNooliteCommand', time(), 0, $this->name);
        exec($cmdline);
       } else {
        $diff=$diff+1;
        DebMes("Noolite delayed (".($diff).") cmd: ".$cmdline); 
-       setGlobal('ThisComputer.LatestNooliteCommand', time()+$diff);
-       setTimeOut('noocommand'.md5($cmdline), 'exec("'.$cmdline.'");', $diff);
+       setGlobal('ThisComputer.LatestNooliteCommand', time()+$diff, 0, $this->name);
+       setTimeOut('noocommand'.md5($cmdline), 'exec(\''.$cmdline.'\');', $diff);
       }
      }
    endMeasure('noolite_sendapi');
@@ -502,7 +502,7 @@ function usual(&$out) {
              continue;
        }
        if ($commands_linked[$i2]['LINKED_OBJECT'] && $commands_linked[$i2]['LINKED_PROPERTY']) {
-             setGlobal($commands_linked[$i2]['LINKED_OBJECT'].'.'.$commands_linked[$i2]['LINKED_PROPERTY'], $commands_linked[$i2]['SCENE_VALUE'], array($this->name=>'0'));
+             setGlobal($commands_linked[$i2]['LINKED_OBJECT'].'.'.$commands_linked[$i2]['LINKED_PROPERTY'], $commands_linked[$i2]['SCENE_VALUE'], array($this->name=>'0'), $this->name);
              $commands_linked[$i2]['VALUE']=$commands_linked[$i2]['SCENE_VALUE'];
        }
        $commands_linked[$i2]['VALUE']=$commands_linked[$i2]['SCENE_VALUE'];

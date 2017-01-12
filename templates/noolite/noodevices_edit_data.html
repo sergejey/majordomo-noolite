@@ -21,6 +21,7 @@
   <td><#LANG_TYPE#></td>
   <td><#LANG_TITLE#></td>
   <td><#LANG_VALUE#></td>
+  <td><#LANG_DEVICE#></td>
   <td><#LANG_LINKED_OBJECT#></td>
   <td><#LANG_LINKED_PROPERTY#></td>
   [#if "<#DEVICE_TYPE#>"==""#]
@@ -61,6 +62,13 @@
    &nbsp;
   </td>
   <td valign="top"><input type="text" name="value[#ID#]" id="value[#ID#]" value="[#VALUE#]"></td>
+  <td valign="top">
+   [#if SDEVICE_TYPE!=""#]
+    [#module name="devices" action="link" type="<#PROPERTIES.SDEVICE_TYPE#>" source_table="noocommands" source_table_id="<#PROPERTIES.ID#>" linked_object="<#PROPERTIES.LINKED_OBJECT#>"#]
+   [#else#]
+   &nbsp;
+   [#endif#]
+  </td>
   <td valign="top"><input type="text" name="linked_object[#ID#]" id="linked_object[#ID#]" value="[#LINKED_OBJECT#]"></td>
   <td valign="top"><input type="text" name="linked_property[#ID#]" id="linked_property[#ID#]" value="[#LINKED_PROPERTY#]"></td>
   [#if "<#DEVICE_TYPE#>"==""#]
