@@ -653,6 +653,8 @@ noocommands -
  noodevices: ADDRESS varchar(255) NOT NULL DEFAULT ''
  noodevices: SCENARIO_ADDRESS varchar(255) NOT NULL DEFAULT ''
  noodevices: UPDATED datetime
+ noodevices: LOCATION_ID int(10) unsigned NOT NULL DEFAULT 0  
+ noodevices: DESCRIPTION varchar(100) NOT NULL DEFAULT ''
 
  noocommands: ID int(10) unsigned NOT NULL auto_increment
  noocommands: TITLE varchar(100) NOT NULL DEFAULT ''

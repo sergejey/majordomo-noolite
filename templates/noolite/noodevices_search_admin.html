@@ -1,8 +1,30 @@
 
 <!-- table noodevices search -->
-<p>
-<a href="?view_mode=edit_noodevices&data_source=<#DATA_SOURCE#>" class="btn btn-default"> <#LANG_ADD#></a>
-</p>
+<form class="form-inline" name="frmFilter">
+
+ <div class="form-group">
+  <a href="?view_mode=edit_noodevices&data_source=<#DATA_SOURCE#>" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
+  <!--#
+  <a href="?view_mode=render_structure" class="btn btn-default"> <#LANG_DEVICES_UPDATE_CLASSSES#></a>
+  #-->
+
+  </div>
+
+ <div class="form-group">
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <#LANG_SEARCH#>:
+  </div>
+
+ <div class="form-group ">
+  <select name="location_id" class="form-control" onchange="this.form.submit();">
+   <option value=""><#LANG_LOCATION#>
+    [#begin LOCATIONS#]<option value="[#ID#]"[#if ID="<#LOCATION_ID#>"#] selected[#endif#]>[#TITLE#]
+   [#end LOCATIONS#]
+      <option value="-1"[#if "<#LOCATION_ID#>"=="-1"#] selected[#endif#]><#LANG_UNKNOWN#>
+  </select>
+ </div>
+</form>&nbsp;
+
 <table width=100% border=0><tr>
 <td valign=top>
 <!-- results -->
@@ -29,6 +51,7 @@
  <th><a href="?sortby=ADDRESS"><#LANG_CHANNEL#></a></th>
  <th><a href="?sortby=TITLE"><#LANG_TITLE#></a></th>
  <th><a href="?sortby=DEVICE_TYPE"><#LANG_TYPE#></a></th>
+ <th><a href="?sortby=LOCATION_ID"><#LANG_LOCATION#></a></th>
  <th><a href="?sortby=UPDATED"><#LANG_UPDATED#></a></th>
  <th>&nbsp;</th>
 </tr>
@@ -40,6 +63,10 @@
   <b>
    [#TITLE#]
   </a></b>
+  [#if DESCRIPTION!=""#]
+  <br/>
+  <i>[#DESCRIPTION#]</i>
+  [#endif#]
   [#if LINKED#]
   <br/>
   [#begin LINKED#]
@@ -54,6 +81,10 @@
   [#else#]
    Sensor/Remote
   [#endif#]
+ </td>
+<td style="vertical-align:middle"
+   >
+  [#LOCATION#]&nbsp;
  </td>
  <td style="vertical-align:middle"
    >

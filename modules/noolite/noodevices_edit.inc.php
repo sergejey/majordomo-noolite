@@ -115,6 +115,13 @@
    global $address;
    $rec['ADDRESS']=$address;
 
+   global $description;
+   $rec['DESCRIPTION']=$description;
+
+   global $location_id;
+   $rec['LOCATION_ID']=(int)$location_id;
+
+
   }
   // step: data
   if ($this->tab=='data') {
@@ -134,6 +141,10 @@
     } else {
      $new_rec=1;
      $rec['ID']=SQLInsert($table_name, $rec); // adding new record
+    }
+
+    if ($rec['LOCATION_ID']) {
+        $location_title=getRoomObjectByLocation($rec['LOCATION_ID'],1);
     }
 
        $commands=array();
@@ -309,3 +320,5 @@
   }
 
   $out['API_TYPE']=$this->config['API_TYPE'];
+
+  $out['LOCATIONS']=SQLSelect("SELECT ID, TITLE FROM locations ORDER BY TITLE");

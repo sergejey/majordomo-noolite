@@ -24,6 +24,13 @@
 </div>
 
 <div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_DESCRIPTION#] style="color:red;font-weight:bold"[#endif#]>
+ <#LANG_DESCRIPTION#>:
+ </label>
+ <div class="col-lg-4"><input type="text" class="form-control" name="description" value="[#DESCRIPTION#]" id="title"></div>
+</div>
+
+<div class="form-group">
  <label class="col-lg-3 control-label"[#if ERR_ADDRESS#] style="color:red;font-weight:bold"[#endif#]>
  <#LANG_CHANNEL#>:
  </label>
@@ -47,7 +54,6 @@
  </div>
 </div>
 
-
 <!-- DEVICE_TYPE (varchar) -->
 <div class="form-group">
  <label class="col-lg-3 control-label"[#if ERR_DEVICE_TYPE#] style="color:red;font-weight:bold"[#endif#]>
@@ -62,6 +68,16 @@
   </select>
  </div>
 </div>
+
+ <div class="form-group ">
+  <label class="col-lg-4 control-label"><#LANG_LOCATION#>: <#LANG_HCB#>location<#LANG_HCE#></label>
+  <div class="col-lg-4"><select name="location_id" class="form-control">
+   <option value="">-
+    [#begin LOCATIONS#]<option value="[#ID#]"[#if ID="<#LOCATION_ID#>"#] selected[#endif#]>[#TITLE#]
+   [#end LOCATIONS#]
+  </select></div>
+ </div>
+
 <div class="form-group">
         <div class="col-lg-offset-3 col-lg-4">
  [#if ID!=""#]

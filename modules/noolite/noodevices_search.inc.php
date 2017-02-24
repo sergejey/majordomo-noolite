@@ -8,6 +8,15 @@
   }
   $qry="1";
   // search filters
+
+  global $location_id;
+  if ($location_id>0) {
+   $qry.=" AND noodevices.LOCATION_ID=".(int)$location_id;
+  } elseif ($location_id==-1) {
+   $qry.=" AND noodevices.LOCATION_ID=0";
+  }
+  $out['LOCATION_ID']=$location_id;
+
   // QUERY READY
   global $save_qry;
   if ($save_qry) {
@@ -29,11 +38,11 @@
   }
 
   if (!$sortby_noodevices) {
-   $sortby_noodevices="DEVICE_TYPE, ADDRESS, TITLE";
+   $sortby_noodevices="noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.TITLE";
   }
   $out['SORTBY']=$sortby_noodevices;
   // SEARCH RESULTS
-  $res=SQLSelect("SELECT * FROM noodevices WHERE $qry ORDER BY ".$sortby_noodevices);
+  $res=SQLSelect("SELECT noodevices.*, locations.TITLE as LOCATION FROM noodevices LEFT JOIN locations ON noodevices.LOCATION_ID=locations.ID WHERE $qry ORDER BY ".$sortby_noodevices);
   if ($res[0]['ID']) {
    //paging($res, 100, $out); // search result paging
    $total=count($res);
@@ -46,3 +55,5 @@
    }
    $out['RESULT']=$res;
   }
+
+$out['LOCATIONS']=SQLSelect("SELECT ID, TITLE FROM locations ORDER BY TITLE");
