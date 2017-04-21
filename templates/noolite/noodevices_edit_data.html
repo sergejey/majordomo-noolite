@@ -64,7 +64,7 @@
   <td valign="top"><input type="text" name="value[#ID#]" id="value[#ID#]" value="[#VALUE#]"></td>
   <td valign="top">
    [#if SDEVICE_TYPE!=""#]
-    [#module name="devices" action="link" type="<#PROPERTIES.SDEVICE_TYPE#>" source_table="noocommands" source_table_id="<#PROPERTIES.ID#>" linked_object="<#PROPERTIES.LINKED_OBJECT#>"#]
+    [#module name="devices" action="link" type="<#PROPERTIES.SDEVICE_TYPE#>" prefix="Noolight" source_table="noocommands" source_table_id="<#PROPERTIES.ID#>" linked_object="<#PROPERTIES.LINKED_OBJECT#>"#]
    [#else#]
    &nbsp;
    [#endif#]

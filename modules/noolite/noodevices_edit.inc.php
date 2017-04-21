@@ -294,6 +294,10 @@
            $properties[$i]['SDEVICE_TYPE']='relay';
        } elseif ($properties[$i]['COMMAND_ID']=='7' || $properties[$i]['COMMAND_ID']=='8' || $properties[$i]['COMMAND_ID']=='17' || $properties[$i]['COMMAND_ID']=='18') {
            $properties[$i]['SDEVICE_TYPE']='button';
+       } elseif ($properties[$i]['COMMAND_ID']!='103') {
+           $properties[$i]['SDEVICE_TYPE']='dimmer';
+       } elseif ($properties[$i]['COMMAND_ID']!='104') {
+           $properties[$i]['SDEVICE_TYPE']='rgb';
        } elseif ($properties[$i]['COMMAND_ID']!='15') {
            $properties[$i]['SDEVICE_TYPE']='any';
        }

@@ -109,8 +109,13 @@ function run() {
   $out['DATA_SOURCE']=$this->data_source;
   $out['TAB']=$this->tab;
   $this->data=$out;
-  $p=new parser(DIR_TEMPLATES.$this->name."/".$this->name.".html", $this->data, $this);
-  $this->result=$p->result;
+
+  if (!$this->ajax) {
+   $p=new parser(DIR_TEMPLATES.$this->name."/".$this->name.".html", $this->data, $this);
+   $this->result=$p->result;
+  }
+
+
 }
 /**
 * BackEnd
@@ -641,7 +646,7 @@ function usual(&$out) {
 *
 * @access private
 */
- function dbInstall() {
+ function dbInstall($data = '') {
 /*
 noodevices - 
 noocommands - 
