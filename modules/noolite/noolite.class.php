@@ -133,6 +133,7 @@ function admin(&$out) {
  $out['API_TYPE']=$this->config['API_TYPE'];
  $out['API_IGNORE']=$this->config['API_IGNORE'];
  $out['API_BINDING']=$this->config['API_BINDING'];
+ $out['API_PORT']=$this->config['API_PORT'];
  if ($this->view_mode=='update_settings') {
    global $api_url;
    $this->config['API_URL']=$api_url;
@@ -142,7 +143,12 @@ function admin(&$out) {
    $this->config['API_IGNORE']=(int)$api_ignore;
    global $api_binding;
    $this->config['API_BINDING']=(int)$api_binding;
+
+  global $api_port;
+  $this->config['API_PORT']=trim($api_port);
+
    $this->saveConfig();
+   setGlobal('cycle_nooliteControl', 'restart');
    $this->redirect("?");
  }
  if (isset($this->data_source) && !$_GET['data_source'] && !$_POST['data_source']) {
@@ -238,9 +244,12 @@ function usual(&$out) {
    $d3=$_GET['d3'];
    $t=trim($_GET['t']);
    $rh=trim($_GET['rh']);
-  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
+  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows' || $this->config['API_TYPE']=='windows_one') {
    $addr='cell'.$_GET['cell'];
    $title=$_GET['name'];
+   if (!$title) {
+    $title=$addr;
+   }
    $command_id=(int)$_GET['cmd'];
    $d0=$_GET['d0'];
    $d1=$_GET['d1'];
@@ -261,7 +270,11 @@ function usual(&$out) {
    return;
   }
 
-  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE (ADDRESS LIKE '".DBSafe($addr)."' OR ADDRESS='".(int)preg_replace('/\D/', '', $addr)."') AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor')");
+  if ($command_id==128) {
+   return;
+  }
+
+  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE (ADDRESS LIKE '".DBSafe($addr)."' OR ADDRESS='".(int)preg_replace('/\D/', '', $addr)."') AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor' OR DEVICE_TYPE LIKE '%_f')");
   if (!$rec['ID']) {
    $rec['ADDRESS']=$addr;
    $rec['TITLE']=$title;
@@ -296,15 +309,39 @@ function usual(&$out) {
      $value = $y_temp/10;
     }
    }
-
    $command_id2=122;
    if (IsSet($rh) && $rh>0) {
     $value2=$rh;
    } else {
     $value2=(int)str_replace('-','',$d2);
    }
-
+  } elseif ($command_id == 130) {
+   //state received
+   //d1 -- version
+   //d2 -- state
+   //d3 -- brightness
+   if ($rec['DEVICE_TYPE']=='power_f' || $rec['DEVICE_TYPE']=='power_dimmer_f') {
+    //d2
+    $command_id=102;
+    $bins=decbin((int)$d2);
+    $state_bin=substr($bins,0,4);
+    $state_val=bindec($state_bin);
+    if ($state_val==0) {
+     $value=0;
+    } else {
+     $value=1;
+    }
+    if ($rec['DEVICE_TYPE']=='power_dimmer_f') {
+         $command_id2=103;
+         $value2=$d3;
+    }
+   } else {
+    return;
+   }
   }
+
+
+
 
   $command=SQLSelectOne("SELECT * FROM noocommands WHERE DEVICE_ID='".(int)$rec['ID']."' AND COMMAND_ID='".(int)$command_id."'");
   if (!$command['ID']) {
@@ -316,7 +353,11 @@ function usual(&$out) {
   $command['UPDATED']=date('Y-m-d H:i:s');
   SQLUpdate('noocommands', $command);
   if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-    setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
+    if (preg_match('/_f$/',$rec['DEVICE_TYPE'])) {
+     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, array($this->name=>'0')); //)
+    } else {
+     setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
+    }
   }
   if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
    $params=array();
@@ -347,7 +388,11 @@ function usual(&$out) {
    $command['UPDATED']=date('Y-m-d H:i:s');
    SQLUpdate('noocommands', $command);
    if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
+    if (preg_match('/_f$/',$rec['DEVICE_TYPE'])) {
+     setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, array($this->name => '0')); //)
+    } else {
      setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
+    }
    }
    if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
     $params=array();
@@ -454,18 +499,38 @@ function usual(&$out) {
  function sendAPICommand($api_command) {
   $cmdline='';
   startMeasure('noolite_sendapi');
+
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        if (file_exists("c:/Program Files/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files/nooLite/nooLite.exe" -api '.$api_command;
-       } elseif ($this->config['API_TYPE']=='http' && $this->config['API_URL']) {
-        $url=$this->config['API_URL'].urlencode($api_command);
-        DebMes("Sending noo api request: ".$url);
-        $data=getURL($url, 0);
        } elseif (file_exists("c:/Program Files (x86)/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files (x86)/nooLite/nooLite.exe" -api '.$api_command;
        } else {
         DebMes("Noolite App not found");
        }
+      } elseif ($this->config['API_TYPE']=='windows_one') {
+       if (file_exists("c:/Program Files/nooLite ONE/nooLite_ONE.exe")) {
+        $cmdline='"c:/Program Files/nooLite ONE/nooLite_ONE.exe" api '.$api_command;
+       } elseif (file_exists("c:/Program Files (x86)/nooLite ONE/nooLite_ONE.exe")) {
+        $cmdline='"c:/Program Files (x86)/nooLite ONE/nooLite_ONE.exe" api '.$api_command;
+       } else {
+        DebMes("Noolite App not found");
+       }
+
+      } elseif ($this->config['API_TYPE']=='http' && $this->config['API_URL']) {
+       $url=$this->config['API_URL'].urlencode($api_command);
+       DebMes("Sending noo api request: ".$url);
+       getURL($url, 0);
+
+      } elseif ($this->config['API_TYPE']=='serial') {
+       $current_queue=getGlobal('noolitePushMessage');
+       $queue=explode("\n", $current_queue);
+       $queue[]=$api_command;
+       if (count($queue)>=25) {
+        $queue = array_slice($queue, -25);
+       }
+       setGlobal('noolitePushMessage', implode("\n", $queue));
+
       } elseif ($this->config['API_TYPE']=='linux') {
        $cmdline='sudo noolitepc '.$api_command;
       }
@@ -489,7 +554,7 @@ function usual(&$out) {
 
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
-   $commands=SQLSelect("SELECT noocommands.*, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
+   $commands=SQLSelect("SELECT noocommands.*, noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
    //DebMes("nooCommand: $object.$property");
    $total=count($commands);
    if ($total) {
@@ -497,6 +562,12 @@ function usual(&$out) {
      //to-do
      $api_command='';
      $cmdline='';
+
+     if (preg_match('/f$/',$commands[$i]['DEVICE_TYPE'])) {
+      $controller_mode = '2';
+     } else {
+      $controller_mode = '0';
+     }
 
      if ($commands[$i]['COMMAND_ID']=='7' && $value && $commands[$i]['SCENARIO_ADDRESS']) { //load preset
 
@@ -518,6 +589,9 @@ function usual(&$out) {
 
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
         $api_command='-load_preset_ch'.$commands[$i]['SCENARIO_ADDRESS'];
+      } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       $cmd_code=7;
+       $api_command=$controller_mode.' 0 0 '.$commands[$i]['SCENARIO_ADDRESS'].' '.$cmd_code.' 0 0 0 0 0 00000000 0';
       } elseif ($this->config['API_TYPE']=='linux') {
         $api_command='--load '.$commands[$i]['SCENARIO_ADDRESS'];
       } elseif ($this->config['API_TYPE']=='http') {
@@ -538,6 +612,13 @@ function usual(&$out) {
        } else {
         $api_command='--off '.$commands[$i]['ADDRESS'];
        }
+      } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       if ($value) {
+        $cmd_code=2;
+       } else {
+        $cmd_code=0;
+       }
+       $api_command=$controller_mode.' 0 0 '.$commands[$i]['ADDRESS'].' '.$cmd_code.' 0 0 0 0 0 00000000 0';
       } elseif ($this->config['API_TYPE']=='http') {
        if ($value) {
         $api_command='CHANNEL:'.$commands[$i]['ADDRESS'].':2';
@@ -550,6 +631,15 @@ function usual(&$out) {
      if ($commands[$i]['COMMAND_ID']=='103') { //dimmer brightness
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_ch'.$commands[$i]['ADDRESS'].' -'.$value;
+      } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       // SET_BR.bat - установка яркости (10 - номер канала, 6 - команда установки яркости/цвета, 1 - формат для установки яркости, 100 - уровень яркости);
+       // "C:\Program Files (x86)\nooLite ONE\nooLite_ONE.exe" api 0 0 0 10 6 1 100 0 0 0 00000000 0
+       $cmd_code = 6;
+       $d0 = $value;
+       $d1 = 0;
+       $d2 = 0;
+       $d3 = 0;
+       $api_command=$controller_mode.' 0 0 '.$commands[$i]['SCENARIO_ADDRESS'].' '.$cmd_code.' 1 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 00000000 0';
       } elseif ($this->config['API_TYPE']=='linux') {
       $api_command='--set '.$commands[$i]['ADDRESS'].' '.$value;
       }
@@ -570,6 +660,14 @@ function usual(&$out) {
       }
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_color_ch'.$commands[$i]['ADDRESS'].' -'.$r.' -'.$g.' -'.$b;
+      } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       // SET_COLOR.bat - установка цвета RGB (10 - номер канала, 6 - команда установки яркости/цвета, 3 - формат для установки цвета, 100 - уровень красного, 255 - уровень зелёного, 200 - уровень синего);
+       $cmd_code = 6;
+       $d0 = $r;
+       $d1 = $g;
+       $d2 = $b;
+       $d3 = 0;
+       $api_command==$controller_mode.' 0 0 '.$commands[$i]['SCENARIO_ADDRESS'].' '.$cmd_code.' 3 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--color '.$commands[$i]['ADDRESS'].' '.$r.' '.$g.' '.$b;
       }
@@ -606,6 +704,7 @@ function usual(&$out) {
      }
 
 
+      unset($commands[$i]['DEVICE_TYPE']);
       unset($commands[$i]['ADDRESS']);
       unset($commands[$i]['SCENARIO_ADDRESS']);
       $commands[$i]['UPDATED']=date('Y-m-d H:i:s');

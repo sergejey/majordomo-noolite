@@ -51,6 +51,16 @@
    if ($this->config['API_TYPE']=='linux') {
     $api_command='bind '.$ch;
     safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
+   } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       //включение режима привязки датчика (1 - режим работы адаптера nooLite-RX, 3 -включить привязку, 10 - номер канала);
+       //1 3 0 10 0 0 0 0 0 0 00000000 0
+       $cmd_code = 0;
+       $d0 = 0;
+       $d1 = 0;
+       $d2 = 0;
+       $d3 = 0;
+       $api_command='1 3 0 '.$ch.' '.$cmd_code.' 0 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
+       $this->sendAPICommand($api_command);
    }
   }
 
@@ -59,10 +69,14 @@
    if ($this->config['API_TYPE']=='linux') {
     $api_command='stop '.$ch;
     safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
-/*
-    $cmdline='nooliterxcfg '.$api_command;
-    safe_exec($cmdline);
-*/
+   } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+       $cmd_code = 0;
+       $d0 = 0;
+       $d1 = 0;
+       $d2 = 0;
+       $d3 = 0;
+       $api_command='1 4 0 '.$ch.' '.$cmd_code.' 0 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
+       $this->sendAPICommand($api_command);
    }
   }
 
@@ -73,6 +87,19 @@
 
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-bind_'.$ch;
+      } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+          //0 0 0 10 15 0 0 0 0 0 00000000 0
+          $cmd_code = 15;
+          $d0 = 0;
+          $d1 = 0;
+          $d2 = 0;
+          $d3 = 0;
+          if (preg_match('/f$/',$rec['DEVICE_TYPE'])) {
+            $controller_mode = '2';
+          } else {
+            $controller_mode = '0';
+          }
+          $api_command=$controller_mode.' 0 0 '.$ch.' '.$cmd_code.' 0 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 00000000 0';
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--bind '.$ch;
       } elseif ($this->config['API_TYPE']=='http') {

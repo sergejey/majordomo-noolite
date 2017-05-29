@@ -36,23 +36,20 @@ timeout = 250</pre>
  API Type:
  </label>
  <div class="controls">
- <input type="radio" name="api_type" value="windows"[#if API_TYPE="" || API_TYPE="windows"#] checked[#endif#]> Windows App
- &nbsp;&nbsp;&nbsp;
+ <input type="radio" name="api_type" value="windows"[#if API_TYPE="" || API_TYPE="windows"#] checked[#endif#]> Windows App (nooLite Receiver / Control apps)
+     <br/>
+     <input type="radio" name="api_type" value="windows_one"[#if API_TYPE="windows_one"#] checked[#endif#]> Windows App (nooLite One)
+     <br/>
  <input type="radio" name="api_type" value="linux"[#if API_TYPE="linux"#] checked[#endif#]> Linux App
- &nbsp;&nbsp;&nbsp;
- <input type="radio" name="api_type" value="http"[#if API_TYPE="http"#] checked[#endif#]> HTTP-gate
+     <br/>
+ <input type="radio" name="api_type" value="http"[#if API_TYPE="http"#] checked[#endif#]> HTTP-gate url:
+     <input type="text" name="api_url" value="[#API_URL#]">
+     <br/>
+  <input type="radio" name="api_type" value="serial"[#if API_TYPE="serial"#] checked[#endif#]> Serial port:
+     <input type="text" name="api_port" value="[#API_PORT#][#if API_PORT=""#]/dev/ttyUSB0[#endif#]">
+     <br/>
  </div>
 </div>
-
-<div class="form-group">
- <label class="control-label">
-  HTTP-gate URL:
- </label>
- <div class="controls">
-  <input type="text" name="api_url" value="[#API_URL#]" class="form-control">
- </div>
-</div>
-
 
 <!--#
 <div class="form-group">

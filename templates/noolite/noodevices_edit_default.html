@@ -37,7 +37,7 @@
  <div class="col-lg-4">
  <input type="text" class="form-control" name="address" value="[#ADDRESS#]" id="address">
  [#if ID!=""#]
- [#if DEVICE_TYPE=="power" || DEVICE_TYPE=="power_dimmer" || DEVICE_TYPE=="power_rgb"#]
+ [#if DEVICE_TYPE=="power" || DEVICE_TYPE=="power_f" || DEVICE_TYPE=="power_dimmer" || DEVICE_TYPE=="power_dimmer_f" || DEVICE_TYPE=="power_rgb"#]
  <br/>
  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=bind" class="btn btn-default">Bind</a>
  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=unbind" class="btn btn-default">Un-bind</a>
@@ -65,6 +65,8 @@
    <option value="power"[#if DEVICE_TYPE=="power"#] selected[#endif#]>Power Unit (Switch)
    <option value="power_dimmer"[#if DEVICE_TYPE=="power_dimmer"#] selected[#endif#]>Power Unit (Dimmer)
    <option value="power_rgb"[#if DEVICE_TYPE=="power_rgb"#] selected[#endif#]>Power Unit (RGB-controller)
+   <option value="power_f"[#if DEVICE_TYPE=="power_f"#] selected[#endif#]>Power Unit (Switch, nooLite-F)
+   <option value="power_dimmer_f"[#if DEVICE_TYPE=="power_dimmer_f"#] selected[#endif#]>Power Unit (Dimmer, nooLite-F)
   </select>
  </div>
 </div>
