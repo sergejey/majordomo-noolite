@@ -244,7 +244,7 @@ function usual(&$out) {
    $d3=$_GET['d3'];
    $t=trim($_GET['t']);
    $rh=trim($_GET['rh']);
-  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows' || $this->config['API_TYPE']=='windows_one') {
+  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows' || $this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
    $addr='cell'.$_GET['cell'];
    $title=$_GET['name'];
    if (!$title) {
