@@ -563,6 +563,11 @@ function usual(&$out) {
      $api_command='';
      $cmdline='';
 
+     if ($this->config['API_TYPE']!='http') {
+      $commands[$i]['ADDRESS']=preg_replace('/\D/','',$commands[$i]['ADDRESS']);
+      $commands[$i]['SCENARIO_ADDRESS']=preg_replace('/\D/','',$commands[$i]['SCENARIO_ADDRESS']);
+     }
+
      if (preg_match('/f$/',$commands[$i]['DEVICE_TYPE'])) {
       $controller_mode = '2';
      } else {
@@ -639,7 +644,7 @@ function usual(&$out) {
        $d1 = 0;
        $d2 = 0;
        $d3 = 0;
-       $api_command=$controller_mode.' 0 0 '.$commands[$i]['SCENARIO_ADDRESS'].' '.$cmd_code.' 1 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 00000000 0';
+       $api_command=$controller_mode.' 0 0 '.$commands[$i]['ADDRESS'].' '.$cmd_code.' 1 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 00000000 0';
       } elseif ($this->config['API_TYPE']=='linux') {
       $api_command='--set '.$commands[$i]['ADDRESS'].' '.$value;
       }
@@ -667,7 +672,7 @@ function usual(&$out) {
        $d1 = $g;
        $d2 = $b;
        $d3 = 0;
-       $api_command==$controller_mode.' 0 0 '.$commands[$i]['SCENARIO_ADDRESS'].' '.$cmd_code.' 3 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
+       $api_command==$controller_mode.' 0 0 '.$commands[$i]['ADDRESS'].' '.$cmd_code.' 3 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--color '.$commands[$i]['ADDRESS'].' '.$r.' '.$g.' '.$b;
       }
