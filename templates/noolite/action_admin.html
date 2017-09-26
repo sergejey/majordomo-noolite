@@ -42,6 +42,9 @@ timeout = 250</pre>
      <br/>
  <input type="radio" name="api_type" value="linux"[#if API_TYPE="linux"#] checked[#endif#]> Linux App
      <br/>
+     <input type="radio" name="api_type" value="pr1132"[#if API_TYPE="pr1132"#] checked[#endif#]> Ethernet gate (PR1132)
+     IP: <input type="text" name="api_gate" value="[#API_GATE#]">
+     <br/>
  <input type="radio" name="api_type" value="http"[#if API_TYPE="http"#] checked[#endif#]> HTTP-gate url:
      <input type="text" name="api_url" value="[#API_URL#]">
      <br/>

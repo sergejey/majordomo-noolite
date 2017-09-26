@@ -104,6 +104,8 @@
        $api_command='--bind '.$ch;
       } elseif ($this->config['API_TYPE']=='http') {
        $api_command='CHANNEL:'.$ch.':15';
+      } elseif ($this->config['API_TYPE']=='pr1132') {
+          $api_command='ch='.$ch.'&cmd=15';
       }
       $this->sendAPICommand($api_command);
   }
@@ -117,6 +119,8 @@
        $api_command='--unbind '.$ch;
       } elseif ($this->config['API_TYPE']=='http') {
        $api_command='CHANNEL:'.$ch.':9';
+      } elseif ($this->config['API_TYPE']=='pr1132') {
+          $api_command='ch='.$ch.'&cmd=9';
       }
       $this->sendAPICommand($api_command);
 

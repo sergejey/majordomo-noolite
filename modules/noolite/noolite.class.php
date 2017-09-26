@@ -130,6 +130,7 @@ function admin(&$out) {
  if (!$out['API_URL']) {
   $out['API_URL']='http://';
  }
+ $out['API_GATE']=$this->config['API_GATE'];
  $out['API_TYPE']=$this->config['API_TYPE'];
  $out['API_IGNORE']=$this->config['API_IGNORE'];
  $out['API_BINDING']=$this->config['API_BINDING'];
@@ -143,6 +144,10 @@ function admin(&$out) {
    $this->config['API_IGNORE']=(int)$api_ignore;
    global $api_binding;
    $this->config['API_BINDING']=(int)$api_binding;
+
+  global $api_gate;
+  $this->config['API_GATE']=$api_gate;
+
 
   global $api_port;
   $this->config['API_PORT']=trim($api_port);
@@ -521,7 +526,10 @@ function usual(&$out) {
        $url=$this->config['API_URL'].urlencode($api_command);
        DebMes("Sending noo api request: ".$url);
        getURL($url, 0);
-
+      } elseif ($this->config['API_TYPE']=='pr1132' && $this->config['API_GATE']) {
+       $url='http://'.$this->config['API_GATE'].'/api.htm?'.urlencode($api_command);
+       DebMes("Sending noo api request: ".$url);
+       getURL($url, 0);
       } elseif ($this->config['API_TYPE']=='serial') {
        $current_queue=getGlobal('noolitePushMessage');
        $queue=explode("\n", $current_queue);
@@ -601,6 +609,8 @@ function usual(&$out) {
         $api_command='--load '.$commands[$i]['SCENARIO_ADDRESS'];
       } elseif ($this->config['API_TYPE']=='http') {
        $api_command='CHANNEL:'.$commands[$i]['SCENARIO_ADDRESS'].':7'; // ???
+      } elseif ($this->config['API_TYPE']=='pr1132') {
+       $api_command='ch='.$commands[$i]['SCENARIO_ADDRESS'].'&cmd=7';
       }
      }
 
@@ -629,6 +639,12 @@ function usual(&$out) {
         $api_command='CHANNEL:'.$commands[$i]['ADDRESS'].':2';
        } else {
         $api_command='CHANNEL:'.$commands[$i]['ADDRESS'].':0';
+       }
+      } elseif ($this->config['API_TYPE']=='pr1132') {
+       if ($value) {
+        $api_command='ch='.$commands[$i]['ADDRESS'].'&cmd=2';
+       } else {
+        $api_command='ch='.$commands[$i]['ADDRESS'].'&cmd=0';
        }
       }
      }
