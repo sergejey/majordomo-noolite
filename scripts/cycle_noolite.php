@@ -27,7 +27,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
         $device_path='/dev/ttyUSB0';
     }
     $device_speed=9600;
-    $init_str='stty -F '.$device_path.' ispeed '.$device_speed.' ospeed '.$device_speed.' -ignpar cs8 -cstopb';
+    $init_str='stty -F '.$device_path.' cs8 '.$device_speed.' ignbrk -brkint -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts';
     echo date('Y-m-d H:i:s')." Init string: ".$init_str."\n";
     exec($init_str);
 
@@ -43,6 +43,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
 
         $readInProgress=0;
         $readStarted=0;
+        $sequence='';
         while (1) {
 
             if ((time()-$checkedTime)>=5) {
@@ -52,6 +53,16 @@ if ($noo->config['API_TYPE'] == 'serial') {
 
             $r = fread($fp,1);
             $ch=binaryToString($r);
+            if ($ch!='') {
+                //echo $ch."\n";
+                $sequence.=$ch;
+                $latest_in=time();
+            } else {
+                if ((time()-$latest_in)>1 && $sequence!='') {
+                    //echo "SEQ: $sequence\n";
+                    $sequence='';
+                }
+            }
             if ($ch=='ad') {
                 $in = $ch;
                 $readInProgress=1;
@@ -80,6 +91,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
                 $url.='&id='.binaryToString(makePayload(array($data[11],$data[12],$data[13],$data[14])));
                 $url.='&crc='.$data[15];
                 echo date('Y-m-d H:i:s')." URL: $url\n";
+                DebMes("IN: $line\nURL: $url",'noolite');
                 $res = get_headers($url);
             } else {
                 $in.=$ch;
@@ -110,6 +122,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
                         usleep(200000);
                     }
                     echo "Sending: ".$queue[$i]."\n";
+                    DebMes("OUT: ".$queue[$i],'noolite');
                     $tmp = explode(' ',$queue[$i]);
                     $total = count($tmp);
                     $in = '';

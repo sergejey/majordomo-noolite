@@ -43,10 +43,11 @@
  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=unbind" class="btn btn-default">Un-bind</a>
  [#endif#]
 
- [#if DEVICE_TYPE=="" && API_TYPE="linux"#]
+ [#if DEVICE_TYPE=="" && (API_TYPE="linux" || API_TYPE="serial")#]
  <br/>
  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=start_binding" class="btn btn-default">Start binding</a>
  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=stop_binding" class="btn btn-default">Stop binding</a>
+  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=clear_binding" class="btn btn-default">Clear binding</a>
  [#endif#]
 
  [#endif ID#]

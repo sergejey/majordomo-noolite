@@ -80,6 +80,22 @@
    }
   }
 
+if ($this->mode=='clear_binding' && $ch!='') {
+    $out['MESSAGE']='Clearing binding mode on channel #'.$ch;
+    if ($this->config['API_TYPE']=='linux') {
+        $api_command='stop '.$ch;
+        safe_exec('php '.DIR_MODULES.'noolite/socket.php '.$api_command);
+    } elseif ($this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+        $cmd_code = 0;
+        $d0 = 0;
+        $d1 = 0;
+        $d2 = 0;
+        $d3 = 0;
+        $api_command='1 5 0 '.$ch.' '.$cmd_code.' 0 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
+        $this->sendAPICommand($api_command);
+    }
+}
+
 
 
   if ($this->mode=='bind' && $ch!='') {
