@@ -299,6 +299,8 @@ function usual(&$out) {
    $value='1';
   } elseif ($command_id==4) {
    $value='1';
+  } elseif ($command_id==25) {
+   $value='1';
   } elseif ($command_id==21) {
    $command_id=121;
    if (IsSet($t)) {
