@@ -323,6 +323,7 @@ function usual(&$out) {
     $value2=(int)str_replace('-','',$d2);
    }
   } elseif ($command_id == 130) {
+   return; // temporary disabled
    //state received
    //d1 -- version
    //d2 -- state
