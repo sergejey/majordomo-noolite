@@ -198,11 +198,11 @@ function usual(&$out) {
  }
 
  if ($this->ajax) {
-  //DebMes("noolite request: ".$_SERVER['REQUEST_URI']);
+  //DebMes("noolite request: ".$_SERVER['REQUEST_URI'],'noolite');
 
   $value=0;
   $this->getConfig();
-  DebMes('AJAX request: '.serialize($_GET));
+  //DebMes('AJAX request: '.serialize($_GET),'noolite');
 
   if (preg_match('/^RECEIVED:(.+)/', $_GET['data'], $m)) {
    $tmp=explode(':', $m[1]);
@@ -217,7 +217,7 @@ function usual(&$out) {
    //if ($this->config['API_IGNORE']) {
     $device_rec=SQLSelectOne("SELECT ID FROM noodevices WHERE ADDRESS LIKE '".DBSafe($_GET['did'])."'");
     if (!$device_rec['ID']) {
-     DebMes("Data from unknown device: ".serialize($_GET));
+     DebMes("Data from unknown device: ".serialize($_GET),'noolite');
      $ok=0;
     }
    //}
@@ -249,7 +249,11 @@ function usual(&$out) {
    $d3=$_GET['d3'];
    $t=trim($_GET['t']);
    $rh=trim($_GET['rh']);
-  } elseif ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows' || $this->config['API_TYPE']=='windows_one' || $this->config['API_TYPE']=='serial') {
+  } elseif ($this->config['API_TYPE']=='' ||
+      $this->config['API_TYPE']=='windows' ||
+      $this->config['API_TYPE']=='windows_one' ||
+      $this->config['API_TYPE']=='pr1132' ||
+      $this->config['API_TYPE']=='serial') {
    $addr='cell'.$_GET['cell'];
    $title=$_GET['name'];
    if (!$title) {
@@ -514,7 +518,7 @@ function usual(&$out) {
        } elseif (file_exists("c:/Program Files (x86)/nooLite/nooLite.exe")) {
         $cmdline='"c:/Program Files (x86)/nooLite/nooLite.exe" -api '.$api_command;
        } else {
-        DebMes("Noolite App not found");
+        DebMes("Noolite App not found",'noolite');
        }
       } elseif ($this->config['API_TYPE']=='windows_one') {
        if (file_exists("c:/Program Files/nooLite ONE/nooLite_ONE.exe")) {
@@ -522,16 +526,16 @@ function usual(&$out) {
        } elseif (file_exists("c:/Program Files (x86)/nooLite ONE/nooLite_ONE.exe")) {
         $cmdline='"c:/Program Files (x86)/nooLite ONE/nooLite_ONE.exe" api '.$api_command;
        } else {
-        DebMes("Noolite App not found");
+        DebMes("Noolite App not found",'noolite');
        }
 
       } elseif ($this->config['API_TYPE']=='http' && $this->config['API_URL']) {
        $url=$this->config['API_URL'].urlencode($api_command);
-       DebMes("Sending noo api request: ".$url);
+       DebMes("Sending noo api request: ".$url,'noolite');
        getURL($url, 0);
       } elseif ($this->config['API_TYPE']=='pr1132' && $this->config['API_GATE']) {
        $url='http://'.$this->config['API_GATE'].'/api.htm?'.urlencode($api_command);
-       DebMes("Sending noo api request: ".$url);
+       DebMes("Sending noo api request: ".$url,'noolite');
        getURL($url, 0);
       } elseif ($this->config['API_TYPE']=='serial') {
        $current_queue=getGlobal('noolitePushMessage');
@@ -550,12 +554,12 @@ function usual(&$out) {
       $latest_command_sent=(int)getGlobal('ThisComputer.LatestNooliteCommand');
       $diff=$latest_command_sent-time();
       if ($diff<0) {
-       DebMes("Noolite instant cmd: ".$cmdline);
+       DebMes("Noolite instant cmd: ".$cmdline,'noolite');
        setGlobal('ThisComputer.LatestNooliteCommand', time(), 0, $this->name);
        exec($cmdline);
       } else {
        $diff=$diff+1;
-       DebMes("Noolite delayed (".($diff).") cmd: ".$cmdline); 
+       DebMes("Noolite delayed (".($diff).") cmd: ".$cmdline,'noolite');
        setGlobal('ThisComputer.LatestNooliteCommand', time()+$diff, 0, $this->name);
        setTimeOut('noocommand'.md5($cmdline), 'exec(\''.$cmdline.'\');', $diff);
       }
@@ -566,7 +570,7 @@ function usual(&$out) {
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
    $commands=SQLSelect("SELECT noocommands.*, noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
-   //DebMes("nooCommand: $object.$property");
+   //DebMes("nooCommand: $object.$property",'noolite');
    $total=count($commands);
    if ($total) {
     for($i=0;$i<$total;$i++) {
@@ -680,7 +684,7 @@ function usual(&$out) {
        $r=round(hexdec(substr($tmp,0,2))*100/256);
        $g=round(hexdec(substr($tmp,2,2))*100/256);
        $b=round(hexdec(substr($tmp,4,2))*100/256);
-       DebMes($tmp.'='."$r-$g-$b");
+       DebMes($tmp.'='."$r-$g-$b",'noolite');
       }
       if ($this->config['API_TYPE']=='' || $this->config['API_TYPE']=='windows') {
        $api_command='-set_color_ch'.$commands[$i]['ADDRESS'].' -'.$r.' -'.$g.' -'.$b;
