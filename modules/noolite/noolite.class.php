@@ -530,11 +530,11 @@ function usual(&$out) {
        }
 
       } elseif ($this->config['API_TYPE']=='http' && $this->config['API_URL']) {
-       $url=$this->config['API_URL'].urlencode($api_command);
+       $url=$this->config['API_URL'].($api_command);
        DebMes("Sending noo api request: ".$url,'noolite');
        getURL($url, 0);
       } elseif ($this->config['API_TYPE']=='pr1132' && $this->config['API_GATE']) {
-       $url='http://'.$this->config['API_GATE'].'/api.htm?'.urlencode($api_command);
+       $url='http://'.$this->config['API_GATE'].'/api.htm?'.($api_command);
        DebMes("Sending noo api request: ".$url,'noolite');
        getURL($url, 0);
       } elseif ($this->config['API_TYPE']=='serial') {
