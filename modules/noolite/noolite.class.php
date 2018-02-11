@@ -254,7 +254,13 @@ function usual(&$out) {
       $this->config['API_TYPE']=='windows_one' ||
       $this->config['API_TYPE']=='pr1132' ||
       $this->config['API_TYPE']=='serial') {
-   $addr='cell'.$_GET['cell'];
+
+   if ($this->config['API_TYPE']=='serial') {
+    $addr=$_GET['cell'];
+   } else {
+    $addr='cell'.$_GET['cell'];
+   }
+
    $title=$_GET['name'];
    if (!$title) {
     $title=$addr;
@@ -283,7 +289,11 @@ function usual(&$out) {
    return;
   }
 
-  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE (ADDRESS LIKE '".DBSafe($addr)."' OR ADDRESS='".(int)preg_replace('/\D/', '', $addr)."') AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor' OR DEVICE_TYPE LIKE '%_f')");
+  $req_qry="(ADDRESS LIKE '".DBSafe($addr)."' OR ADDRESS='".(int)preg_replace('/\D/', '', $addr)."')";
+  if ($this->config['API_TYPE']!='serial') {
+   $req_qry.=" AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor' OR DEVICE_TYPE LIKE '%_f')";
+  }
+  $rec=SQLSelectOne("SELECT * FROM noodevices WHERE $req_qry");
   if (!$rec['ID']) {
    $rec['ADDRESS']=$addr;
    $rec['TITLE']=$title;

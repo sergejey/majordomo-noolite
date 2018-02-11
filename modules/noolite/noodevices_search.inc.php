@@ -28,6 +28,9 @@
 
   global $sortby;
   if ($sortby) {
+   if ($sortby=='ADDRESS') {
+    $sortby='cast(ADDRESS as unsigned)';
+   }
    if ($sortby == $session->data['SORTBY_NOODEVICES']) {
     $sortby = $sortby.' DESC';
    }
@@ -38,7 +41,7 @@
   }
 
   if (!$sortby_noodevices) {
-   $sortby_noodevices="noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.TITLE";
+   $sortby_noodevices="noodevices.DEVICE_TYPE, cast(noodevices.ADDRESS as unsigned), noodevices.ADDRESS, noodevices.TITLE";
   }
   $out['SORTBY']=$sortby_noodevices;
   // SEARCH RESULTS

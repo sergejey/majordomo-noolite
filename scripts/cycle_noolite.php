@@ -27,7 +27,8 @@ if ($noo->config['API_TYPE'] == 'serial') {
         $device_path='/dev/ttyUSB0';
     }
     $device_speed=9600;
-    $init_str='stty -F '.$device_path.' cs8 '.$device_speed.' ignbrk -brkint -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts';
+    //$init_str='stty -F '.$device_path.' cs8 '.$device_speed.' ignbrk -brkint -imaxbel -opost -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke noflsh -ixon -crtscts';
+    $init_str='stty -F '.$device_path.' cs8 '.$device_speed.' -icrnl -ixon -ixoff -opost -isig -icanon -echo';
     echo date('Y-m-d H:i:s')." Init string: ".$init_str."\n";
     exec($init_str);
 
@@ -53,6 +54,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
 
             $r = fread($fp,1);
             $ch=binaryToString($r);
+            //echo ord($r)."\n";
             if ($ch!='') {
                 //echo $ch."\n";
                 $sequence.=$ch;

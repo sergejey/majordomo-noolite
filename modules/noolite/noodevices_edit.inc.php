@@ -370,6 +370,9 @@ if ($this->mode=='clear_binding' && $ch!='') {
    if ($tmp['ID']) {
     $out['SHOW_SCENE']=1;
    }
+  } else {
+      $tmp = SQLSelectOne("SELECT MAX(cast(ADDRESS as unsigned)) as MX FROM noodevices");
+      $out['ADDRESS']=$tmp['MX']+1;
   }
 
   $out['API_TYPE']=$this->config['API_TYPE'];
