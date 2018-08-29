@@ -41,8 +41,11 @@
   }
 
   if (!$sortby_noodevices) {
-   $sortby_noodevices="noodevices.DEVICE_TYPE, cast(noodevices.ADDRESS as unsigned), noodevices.ADDRESS, noodevices.TITLE";
+   $sortby_noodevices="noodevices.DEVICE_TYPE, cast(REPLACE(noodevices.ADDRESS,'cell','') as unsigned), noodevices.ADDRESS, noodevices.TITLE";
   }
+
+
+
   $out['SORTBY']=$sortby_noodevices;
   // SEARCH RESULTS
   $res=SQLSelect("SELECT noodevices.*, locations.TITLE as LOCATION FROM noodevices LEFT JOIN locations ON noodevices.LOCATION_ID=locations.ID WHERE $qry ORDER BY ".$sortby_noodevices);

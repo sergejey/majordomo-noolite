@@ -579,7 +579,13 @@ function usual(&$out) {
 
  function propertySetHandle($object, $property, $value) {
   $this->getConfig();
-   $commands=SQLSelect("SELECT noocommands.*, noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
+
+   if ($property=='' && is_numeric($object)) {
+    $commands=SQLSelect("SELECT noocommands.*, noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE noocommands.ID=".(int)$object);
+   } else {
+    $commands=SQLSelect("SELECT noocommands.*, noodevices.DEVICE_TYPE, noodevices.ADDRESS, noodevices.SCENARIO_ADDRESS FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT LIKE '".DBSafe($object)."' AND LINKED_PROPERTY LIKE '".DBSafe($property)."'");
+   }
+
    //DebMes("nooCommand: $object.$property",'noolite');
    $total=count($commands);
    if ($total) {
@@ -705,7 +711,7 @@ function usual(&$out) {
        $d1 = $g;
        $d2 = $b;
        $d3 = 0;
-       $api_command==$controller_mode.' 0 0 '.$commands[$i]['ADDRESS'].' '.$cmd_code.' 3 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
+       $api_command=$controller_mode.' 0 0 '.$commands[$i]['ADDRESS'].' '.$cmd_code.' 3 '.$d0.' '.$d1.' '.$d2.' '.$d3.' 000000 0 0 0';
       } elseif ($this->config['API_TYPE']=='linux') {
        $api_command='--color '.$commands[$i]['ADDRESS'].' '.$r.' '.$g.' '.$b;
       }

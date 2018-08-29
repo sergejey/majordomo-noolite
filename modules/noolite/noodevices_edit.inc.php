@@ -299,11 +299,11 @@ if ($this->mode=='clear_binding' && $ch!='') {
    $properties=SQLSelect("SELECT * FROM noocommands WHERE DEVICE_ID='".$rec['ID']."' ORDER BY ID");
    $scripts=SQLSelect("SELECT ID, TITLE FROM scripts ORDER BY TITLE");
    $total=count($properties);
+      $to_set=array();
    for($i=0;$i<$total;$i++) {
     if ($properties[$i]['ID']==$new_id) continue;
     if ($this->mode=='update') {
-      global ${'value'.$properties[$i]['ID']};
-      $properties[$i]['VALUE']=trim(${'value'.$properties[$i]['ID']});
+        
       global ${'linked_object'.$properties[$i]['ID']};
       $properties[$i]['LINKED_OBJECT']=trim(${'linked_object'.$properties[$i]['ID']});
       global ${'linked_property'.$properties[$i]['ID']};
@@ -314,6 +314,12 @@ if ($this->mode=='clear_binding' && $ch!='') {
       global ${'script_id'.$properties[$i]['ID']};
       $properties[$i]['SCRIPT_ID']=(int)(${'script_id'.$properties[$i]['ID']});
 
+        global ${'set'.$properties[$i]['ID']};
+        if (${'set'.$properties[$i]['ID']}!=="") {
+            $to_set[$properties[$i]['ID']]=${'set'.$properties[$i]['ID']};
+        }
+      
+        
 
       unset($properties[$i]['UPDATED']);
 
@@ -354,6 +360,14 @@ if ($this->mode=='clear_binding' && $ch!='') {
       $properties[$i]['SCRIPTS']=&$scripts;
      }
    }
+      $need_redirect=0;
+      foreach($to_set as $k=>$v) {
+          $need_redirect=1;
+          $this->propertySetHandle($k,'',$v);
+      }
+      if ($need_redirect) {
+          $this->redirect("?view_mode=".$this->view_mode."&id=".$this->id."&tab=".$this->tab);
+      }
    $out['PROPERTIES']=$properties;   
   }
   if (is_array($rec)) {

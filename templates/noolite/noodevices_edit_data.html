@@ -61,7 +61,16 @@
 
    &nbsp;
   </td>
-  <td valign="top"><input type="text" name="value[#ID#]" id="value[#ID#]" value="[#VALUE#]"></td>
+  <td valign="top">
+   [#VALUE#]
+   <a href="#" onclick="$('#p[#ID#]').show();return false;"><#LANG_SET#></a>
+   <span id="p[#ID#]" style="display:none">
+    <input type="text" name="set[#ID#]">
+   </span>
+   <!--#
+   <input type="text" name="value[#ID#]" id="value[#ID#]" value="[#VALUE#]">
+   #-->
+  </td>
   <td valign="top">
    [#if SDEVICE_TYPE!=""#]
     [#module name="devices" action="link" type="<#PROPERTIES.SDEVICE_TYPE#>" prefix="Noolight" source_table="noocommands" source_table_id="<#PROPERTIES.ID#>" linked_object="<#PROPERTIES.LINKED_OBJECT#>"#]
