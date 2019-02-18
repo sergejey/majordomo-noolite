@@ -39,15 +39,40 @@
  [#if ID!=""#]
  [#if DEVICE_TYPE=="power" || DEVICE_TYPE=="power_f" || DEVICE_TYPE=="power_dimmer" || DEVICE_TYPE=="power_dimmer_f" || DEVICE_TYPE=="power_rgb"#]
  <br/>
- <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=bind" class="btn btn-default">Bind</a>
- <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=unbind" class="btn btn-default">Un-bind</a>
+ <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=bind" class="btn btn-default">Привязать</a>
+ <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=unbind" class="btn btn-default">Отвязать</a>
  [#endif#]
 
  [#if DEVICE_TYPE=="" && (API_TYPE="linux" || API_TYPE="serial")#]
+  [#if START_BINDING!=""#]
+  &nbsp;
+  <div class="alert alert-info">Переведите пульт в режим привязки и нажмите на клавишу.</div>
+  <script type="text/javascript">
+   var bindingTimer=0;
+   function checkBindingCommand() {
+    clearTimeout(bindingTimer);
+    var url="<#ROOTHTML#>ajax/noolite.html?op=check_binding&id=[#ID#]&start_binding=[#START_BINDING#]";
+    $.ajax({
+     url: url
+    }).done(function(data) {
+     if (data.RESULT=='ok') {
+      var go_url="?view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data";
+      window.location.href=go_url;
+     } else {
+      bindingTimer=setTimeout('checkBindingCommand()',2000);
+     }
+    });
+   }
+   function cancelBindingCommand() {
+    clearTimeout(bindingTimer);
+   }
+   bindingTimer=setTimeout('checkBindingCommand()',2000);
+  </script>
+  [#endif START_BINDING#]
  <br/>
- <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=start_binding" class="btn btn-default">Start binding</a>
- <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=stop_binding" class="btn btn-default">Stop binding</a>
-  <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=clear_binding" class="btn btn-default">Clear binding</a>
+ <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=start_binding" class="btn btn-default">Начать привязку</a>
+ <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=stop_binding" class="btn btn-default">Остановить</a>
+ <a href="?data_source=<#DATA_SOURCE#>&id=<#ID#>&view_mode=<#VIEW_MODE#>&mode=clear_binding" class="btn btn-default">Очистить</a>
  [#endif#]
 
  [#endif ID#]
@@ -62,12 +87,12 @@
  </label>
  <div class="col-lg-4">
   <select name="device_type" class="form-control">
-   <option value="">Sensor
-   <option value="power"[#if DEVICE_TYPE=="power"#] selected[#endif#]>Power Unit (Switch)
-   <option value="power_dimmer"[#if DEVICE_TYPE=="power_dimmer"#] selected[#endif#]>Power Unit (Dimmer)
-   <option value="power_rgb"[#if DEVICE_TYPE=="power_rgb"#] selected[#endif#]>Power Unit (RGB-controller)
-   <option value="power_f"[#if DEVICE_TYPE=="power_f"#] selected[#endif#]>Power Unit (Switch, nooLite-F)
-   <option value="power_dimmer_f"[#if DEVICE_TYPE=="power_dimmer_f"#] selected[#endif#]>Power Unit (Dimmer, nooLite-F)
+   <option value="">Датчик/Пульт
+   <option value="power"[#if DEVICE_TYPE=="power"#] selected[#endif#]>Силовой блок (Выключатель)
+   <option value="power_dimmer"[#if DEVICE_TYPE=="power_dimmer"#] selected[#endif#]>Силовой блок (Диммер)
+   <option value="power_rgb"[#if DEVICE_TYPE=="power_rgb"#] selected[#endif#]>Контроллер RGB
+   <option value="power_f"[#if DEVICE_TYPE=="power_f"#] selected[#endif#]>Силовой блок (Выключатель, протокол nooLite-F)
+   <option value="power_dimmer_f"[#if DEVICE_TYPE=="power_dimmer_f"#] selected[#endif#]>Силовой блок (Диммер, протокол nooLite-F)
   </select>
  </div>
 </div>

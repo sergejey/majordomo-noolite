@@ -47,7 +47,7 @@ if ($this->mode == 'autobind' && (int)$rec['SCENARIO_ADDRESS']) {
 }
 
 if ($this->mode == 'start_binding' && $ch != '') {
-    $out['MESSAGE'] = 'Starting binding mode on channel #' . $ch;
+    $out['MESSAGE'] = 'Включен режим привязки для канала #' . $ch;
     if ($this->config['API_TYPE'] == 'linux') {
         $api_command = 'bind ' . $ch;
         safe_exec('php ' . DIR_MODULES . 'noolite/socket.php ' . $api_command);
@@ -62,10 +62,11 @@ if ($this->mode == 'start_binding' && $ch != '') {
         $api_command = '1 3 0 ' . $ch . ' ' . $cmd_code . ' 0 ' . $d0 . ' ' . $d1 . ' ' . $d2 . ' ' . $d3 . ' 000000 0 0 0';
         $this->sendAPICommand($api_command);
     }
+    $out['START_BINDING']=time();
 }
 
 if ($this->mode == 'stop_binding' && $ch != '') {
-    $out['MESSAGE'] = 'Stopping binding mode on channel #' . $ch;
+    $out['MESSAGE'] = 'Остановлен режим привязки для кнаала #' . $ch;
     if ($this->config['API_TYPE'] == 'linux') {
         $api_command = 'stop ' . $ch;
         safe_exec('php ' . DIR_MODULES . 'noolite/socket.php ' . $api_command);
@@ -81,7 +82,7 @@ if ($this->mode == 'stop_binding' && $ch != '') {
 }
 
 if ($this->mode == 'clear_binding' && $ch != '') {
-    $out['MESSAGE'] = 'Clearing binding mode on channel #' . $ch;
+    $out['MESSAGE'] = 'Режим очистки привязки на канале #' . $ch;
     if ($this->config['API_TYPE'] == 'linux') {
         $api_command = 'stop ' . $ch;
         safe_exec('php ' . DIR_MODULES . 'noolite/socket.php ' . $api_command);
@@ -98,7 +99,7 @@ if ($this->mode == 'clear_binding' && $ch != '') {
 
 
 if ($this->mode == 'bind' && $ch != '') {
-    $out['MESSAGE'] = 'Bind command sent for channel #' . $ch;
+    $out['MESSAGE'] = 'Отправлена команда привязки для канала #' . $ch;
 
     if ($this->config['API_TYPE'] == '' || $this->config['API_TYPE'] == 'windows') {
         $api_command = '-bind_' . $ch;
@@ -126,7 +127,7 @@ if ($this->mode == 'bind' && $ch != '') {
 }
 
 if ($this->mode == 'unbind' && $ch != '') {
-    $out['MESSAGE'] = 'Un-bind command sent for channel #' . $ch;
+    $out['MESSAGE'] = 'Отправлена команда снятия привязки для канала #' . $ch;
 
     if ($this->config['API_TYPE'] == '' || $this->config['API_TYPE'] == 'windows') {
         $api_command = '-unbind_' . $ch;

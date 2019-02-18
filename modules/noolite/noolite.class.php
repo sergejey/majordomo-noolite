@@ -204,14 +204,31 @@ class noolite extends module
     function usual(&$out)
     {
 
-
         if ($out['module']) {
             $this->ajax = 1;
         }
 
         if ($this->ajax) {
+
+            $op=gr('op');
+            if ($op=='check_binding') {
+                $start_binding=gr('start_binding','int');
+                $id=gr('id','int');
+                header("Content-type:application/json");
+                $result=array();
+                $tmp=SQLSelectOne("SELECT ID FROM noocommands WHERE DEVICE_ID=".$id." AND COMMAND_ID=15 AND UPDATED>='".date('Y-m-d H:i:s',$start_binding)."'");
+                if ($tmp['ID']) {
+                    $result['RESULT']='ok';
+                } else {
+                    $result['RESULT']='waiting';
+                }
+                echo json_encode($result);
+                exit;
+            }
+
             DebMes("noolite request: " . $_SERVER['REQUEST_URI'], 'noolite');
 
+            $feedback = 0;
             $value = 0;
             $this->getConfig();
             //DebMes('AJAX request: '.serialize($_GET),'noolite');
@@ -349,7 +366,8 @@ class noolite extends module
                     $value2 = (int)str_replace('-', '', $d2);
                 }
             } elseif ($command_id == 130) { // state command
-                return; // temporary disabled
+                $feedback=1;
+                //return; // temporary disabled
                 //state received
                 //d1 -- version
                 //d2 -- state
@@ -386,8 +404,8 @@ class noolite extends module
             $command['UPDATED'] = date('Y-m-d H:i:s');
             SQLUpdate('noocommands', $command);
             if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-                if (preg_match('/_f$/', $rec['DEVICE_TYPE'])) {
-                    setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, array($this->name => '0')); //)
+                if ($feedback) {
+                    setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], array($this->name => '0'), $this->name); //)
                 } else {
                     setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
                 }
@@ -423,8 +441,8 @@ class noolite extends module
                 $command['UPDATED'] = date('Y-m-d H:i:s');
                 SQLUpdate('noocommands', $command);
                 if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-                    if (preg_match('/_f$/', $rec['DEVICE_TYPE'])) {
-                        setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, array($this->name => '0')); //)
+                    if ($feedback) {
+                        setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], array($this->name => '0'),$this->name); //)
                     } else {
                         setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
                     }
@@ -572,6 +590,8 @@ class noolite extends module
             DebMes("Sending noo api request: " . $url, 'noolite');
             getURL($url, 0);
         } elseif ($this->config['API_TYPE'] == 'serial') {
+            addToOperationsQueue('noolite_queue','command',$api_command);
+            /*
             $current_queue = getGlobal('noolitePushMessage');
             $queue = explode("\n", $current_queue);
             $queue[] = $api_command;
@@ -579,6 +599,7 @@ class noolite extends module
                 $queue = array_slice($queue, -25);
             }
             setGlobal('noolitePushMessage', implode("\n", $queue));
+            */
 
         } elseif ($this->config['API_TYPE'] == 'linux') {
             $cmdline = 'sudo noolitepc ' . $api_command;
@@ -708,7 +729,7 @@ class noolite extends module
                         // SET_BR.bat - установка яркости (10 - номер канала, 6 - команда установки яркости/цвета, 1 - формат для установки яркости, 100 - уровень яркости);
                         // "C:\Program Files (x86)\nooLite ONE\nooLite_ONE.exe" api 0 0 0 10 6 1 100 0 0 0 00000000 0
                         $cmd_code = 6;
-                        $d0 = $v;
+                        $d0 = (int)$value;
                         $d1 = 0;
                         $d2 = 0;
                         $d3 = 0;

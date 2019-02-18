@@ -93,7 +93,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
                 $url.='&id='.binaryToString(makePayload(array($data[11],$data[12],$data[13],$data[14])));
                 $url.='&crc='.$data[15];
                 echo date('Y-m-d H:i:s')." URL: $url\n";
-                DebMes("IN: $line\nURL: $url",'noolite');
+                DebMes("IN: $line",'noolite');
                 $res = get_headers($url);
             } else {
                 $in.=$ch;
@@ -110,18 +110,20 @@ if ($noo->config['API_TYPE'] == 'serial') {
                 continue;
             }
 
-            $current_queue=getGlobal('noolitePushMessage');
+            $devices_data=checkOperationsQueue('noolite_queue');
+            $current_queue='';
+            foreach($devices_data as $property_data) {
+                $current_queue.=$property_data['DATAVALUE']."\n";
+            }
+            //$current_queue=getGlobal('noolitePushMessage');
             if ($current_queue!='') {
-                setGlobal('noolitePushMessage', '');
+                //setGlobal('noolitePushMessage', '');
                 $queue=explode("\n", $current_queue);
                 $total=count($queue);
                 $sent_ok=true;
                 for($i=0;$i<$total;$i++) {
                     if (!$queue[$i]) {
                         continue;
-                    }
-                    if ($i>0) {
-                        usleep(200000);
                     }
                     echo "Sending: ".$queue[$i]."\n";
                     DebMes("OUT: ".$queue[$i],'noolite');
@@ -155,6 +157,9 @@ if ($noo->config['API_TYPE'] == 'serial') {
                     } else {
                         echo date('Y-m-d H:i:s')." Sent OK\n";
                     }
+                    if ($i>0) {
+                        usleep(20000);
+                    }
                 }
             }
 
@@ -167,7 +172,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
             }
 
             //echo "Wating for data...\n";
-            usleep(10000);
+            usleep(1000);
 
         }
     } else {
