@@ -1,29 +1,48 @@
 
 <!-- table noodevices search -->
-<form class="form-inline" name="frmFilter">
+<div class="row">
+ <div class="col-md-6">
+  <form class="form-inline" name="frmFilter">
+   <div class="form-group">
+    <a href="?view_mode=edit_noodevices&data_source=<#DATA_SOURCE#>" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
+    <!--#
+    <a href="?view_mode=render_structure" class="btn btn-default"> <#LANG_DEVICES_UPDATE_CLASSSES#></a>
+    #-->
 
- <div class="form-group">
-  <a href="?view_mode=edit_noodevices&data_source=<#DATA_SOURCE#>" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
-  <!--#
-  <a href="?view_mode=render_structure" class="btn btn-default"> <#LANG_DEVICES_UPDATE_CLASSSES#></a>
-  #-->
+   </div>
 
-  </div>
+   <div class="form-group">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <#LANG_SEARCH#>:
+   </div>
 
- <div class="form-group">
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <#LANG_SEARCH#>:
-  </div>
-
- <div class="form-group ">
-  <select name="location_id" class="form-control" onchange="this.form.submit();">
-   <option value=""><#LANG_LOCATION#>
-    [#begin LOCATIONS#]<option value="[#ID#]"[#if ID="<#LOCATION_ID#>"#] selected[#endif#]>[#TITLE#]
-   [#end LOCATIONS#]
-      <option value="-1"[#if "<#LOCATION_ID#>"=="-1"#] selected[#endif#]><#LANG_UNKNOWN#>
-  </select>
+   <div class="form-group ">
+    <select name="location_id" class="form-control" onchange="this.form.submit();">
+     <option value=""><#LANG_LOCATION#>
+      [#begin LOCATIONS#]<option value="[#ID#]"[#if ID="<#LOCATION_ID#>"#] selected[#endif#]>[#TITLE#]
+     [#end LOCATIONS#]
+     <option value="-1"[#if "<#LOCATION_ID#>"=="-1"#] selected[#endif#]><#LANG_UNKNOWN#>
+    </select>
+   </div>
+   <div class="form-group ">
+    <select name="type" class="form-control" onchange="this.form.submit();">
+     <option value=""><#LANG_TYPE#>
+      [#begin TYPES#]<option value="[#VALUE#]"[#if VALUE="<#TYPE#>"#] selected[#endif#]>[#VALUE#]
+     [#end TYPES#]
+    </select>
+   </div>
+  </form>
  </div>
-</form>&nbsp;
+ [#if API_TYPE="serial"#]
+ <div class="col-md-6">
+  [#module name="xray" action="service" cycle="noolite"#]
+  </div>
+ [#endif#]
+</div>
+
+
+
+&nbsp;
 
 <table width=100% border=0><tr>
 <td valign=top>
