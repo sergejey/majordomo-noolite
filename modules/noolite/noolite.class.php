@@ -169,6 +169,12 @@ class noolite extends module
         if (isset($this->data_source) && !$_GET['data_source'] && !$_POST['data_source']) {
             $out['SET_DATASOURCE'] = 1;
         }
+
+        if($this->view_mode=='refresh_noodevices') {
+            $this->pollNooDevices();
+            $this->redirect("?");
+        }
+
         if ($this->data_source == 'noodevices' || $this->data_source == '') {
             if ($this->view_mode == '' || $this->view_mode == 'search_noodevices') {
                 $this->search_noodevices($out);
@@ -194,6 +200,46 @@ class noolite extends module
         }
     }
 
+    function pollNooDevices($id=0) {
+
+        if ($this->config['API_TYPE'] != 'windows_one' && $this->config['API_TYPE'] != 'serial') {
+            // not supported
+            return;
+        }
+
+        // CHECK POLLING DEVICES
+        if ($id) {
+            $polling=SQLSelect("SELECT * FROM noodevices WHERE ID=".(int)$id);
+        } else {
+            $polling=SQLSelect("SELECT * FROM noodevices WHERE POLL_PERIOD>0");
+        }
+
+        foreach($polling as &$pdevice) {
+            if (!preg_match('/\_f$/', $pdevice['DEVICE_TYPE'])) {
+                // not supported
+                continue;
+            }
+
+            if ($id) {
+                $tm=0;
+            } else {
+                $tm=strtotime($pdevice['UPDATED']);
+            }
+
+            if ((time()-$tm)>=$pdevice['POLL_PERIOD']) {
+                $pdevice['UPDATED']=date('Y-m-d H:i:s');
+                SQLUpdate('noodevices',$pdevice);
+                $controller_mode = '2';
+                $address = preg_replace('/\D/', '', $pdevice['ADDRESS']);
+                $cmd_code = 128;
+                $fmt = 0;
+                $api_command = $controller_mode . ' 0 0 ' . $address . ' ' . $cmd_code . ' '.$fmt.' 0 0 0 0 00000000 0';
+                //DebMes("Polling ".$pdevice['TITLE']." with API: $api_command",'noolite');
+                $this->sendAPICommand($api_command);
+            }
+        }
+    }
+
     /**
      * FrontEnd
      *
@@ -211,6 +257,7 @@ class noolite extends module
         if ($this->ajax) {
 
             $op=gr('op');
+
             if ($op=='check_binding') {
                 $start_binding=gr('start_binding','int');
                 $id=gr('id','int');
@@ -226,7 +273,7 @@ class noolite extends module
                 exit;
             }
 
-            DebMes("noolite request: " . $_SERVER['REQUEST_URI'], 'noolite');
+            //DebMes("noolite request: " . $_SERVER['REQUEST_URI'], 'noolite');
 
             $feedback = 0;
             $value = 0;
@@ -283,7 +330,6 @@ class noolite extends module
                 $this->config['API_TYPE'] == 'pr1132' ||
                 $this->config['API_TYPE'] == 'serial'
             ) {
-
                 if ($this->config['API_TYPE'] == 'serial') {
                     $addr = $_GET['cell'];
                 } else {
@@ -294,6 +340,7 @@ class noolite extends module
                 if (!$title) {
                     $title = $addr;
                 }
+
                 $command_id = (int)$_GET['cmd'];
                 $d0 = $_GET['d0'];
                 $d1 = $_GET['d1'];
@@ -309,8 +356,9 @@ class noolite extends module
                 $d3 = $_GET['d3'];
             }
 
-            if (!$addr) {
+            if ($addr=='') {
                 echo "No address set";
+                DebMes("No address set",'noolite');
                 return;
             }
 
@@ -372,7 +420,7 @@ class noolite extends module
                 //d1 -- version
                 //d2 -- state
                 //d3 -- brightness
-                if ($rec['DEVICE_TYPE'] == 'power_f' || $rec['DEVICE_TYPE'] == 'power_dimmer_f') {
+                if (($rec['DEVICE_TYPE'] == 'power_f') || ($rec['DEVICE_TYPE'] == 'power_dimmer_f')) {
                     //d2
                     $command_id = 102;  // power on/off
                     $bins = decbin((int)$d2);
@@ -383,11 +431,14 @@ class noolite extends module
                     } else {
                         $value = 1;
                     }
+
+                    //DebMes("Status bins: $bins (state: $state_bin), value: $value",'noolite');
                     if ($rec['DEVICE_TYPE'] == 'power_dimmer_f') {
                         $command_id2 = 103; // dimmer
                         $value2 = floor($d3 * 100 / 256);
                     }
                 } else {
+                    DebMes("Incorrect status command for device type ".$rec['DEVICE_TYPE'],'noolite');
                     return;
                 }
             }
@@ -861,6 +912,7 @@ class noolite extends module
  noodevices: ADDRESS varchar(255) NOT NULL DEFAULT ''
  noodevices: SCENARIO_ADDRESS varchar(255) NOT NULL DEFAULT ''
  noodevices: UPDATED datetime
+ noodevices: POLL_PERIOD int(10) unsigned NOT NULL DEFAULT 0 
  noodevices: LOCATION_ID int(10) unsigned NOT NULL DEFAULT 0  
  noodevices: DESCRIPTION varchar(100) NOT NULL DEFAULT ''
 

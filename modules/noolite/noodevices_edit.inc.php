@@ -10,6 +10,10 @@ if ($this->owner->name == 'panel') {
 $table_name = 'noodevices';
 $rec = SQLSelectOne("SELECT * FROM $table_name WHERE ID='$id'");
 
+if (preg_match('/\_f$/',$rec['DEVICE_TYPE'])) {
+    $out['CAN_POLL']=1;
+}
+
 $ch = preg_replace('/\D/', '', $rec['ADDRESS']);
 
 if ($this->mode == 'autobind' && (int)$rec['SCENARIO_ADDRESS']) {
@@ -143,6 +147,10 @@ if ($this->mode == 'unbind' && $ch != '') {
 
 }
 
+if ($this->mode == 'poll') {
+    $this->pollNooDevices($rec['ID']);
+    $this->redirect("?view_mode=".$this->view_mode."&id=".$rec['ID']."&tab=".$this->tab);
+}
 
 if ($this->mode == 'update') {
     $ok = 1;
@@ -167,6 +175,8 @@ if ($this->mode == 'update') {
 
         global $location_id;
         $rec['LOCATION_ID'] = (int)$location_id;
+
+        $rec['POLL_PERIOD'] = gr('poll_period','int');
 
 
     }
@@ -298,8 +308,6 @@ if ($this->tab == 'scenarios') {
 
 
 // step: data
-if ($this->tab == 'data') {
-}
 if ($this->tab == 'data') {
     //dataset2
     $new_id = 0;

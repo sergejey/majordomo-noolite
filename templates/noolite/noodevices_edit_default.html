@@ -35,7 +35,7 @@
  <#LANG_CHANNEL#>:
  </label>
  <div class="col-lg-4">
- <input type="text" class="form-control" name="address" value="[#ADDRESS#]" id="address">
+ <input type="text" class="form-control" name="address" value="[#ADDRESS#]" id="address" placeholder="0-63">
  [#if ID!=""#]
  [#if DEVICE_TYPE=="power" || DEVICE_TYPE=="power_f" || DEVICE_TYPE=="power_dimmer" || DEVICE_TYPE=="power_dimmer_f" || DEVICE_TYPE=="power_rgb"#]
  <br/>
@@ -96,6 +96,17 @@
   </select>
  </div>
 </div>
+
+ [#if CAN_POLL="1"#]
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   <#LANG_POLLING_PERIOD#>, <#LANG_SECONDS#>:
+  </label>
+  <div class="col-lg-4">
+   <input type="text" name="poll_period" value="[#POLL_PERIOD#]" class="form-control">
+  </div>
+ </div>
+ [#endif#]
 
  <div class="form-group ">
   <label class="col-lg-4 control-label"><#LANG_LOCATION#>: <#LANG_HCB#>location<#LANG_HCE#></label>
