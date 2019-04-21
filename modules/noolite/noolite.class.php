@@ -273,7 +273,7 @@ class noolite extends module
                 exit;
             }
 
-            //DebMes("noolite request: " . $_SERVER['REQUEST_URI'], 'noolite');
+            DebMes("REQUEST: " . $_SERVER['REQUEST_URI'], 'noolite');
 
             $feedback = 0;
             $value = 0;
