@@ -65,6 +65,13 @@ if ($res[0]['ID']) {
         // some action for every record if required
         $linked = SQLSelect("SELECT * FROM noocommands WHERE DEVICE_ID='" . $res[$i]['ID'] . "' AND LINKED_OBJECT!=''");
         if ($linked[0]['ID']) {
+            $total_l=count($linked);
+            for($il=0;$il<$total_l;$il++) {
+                $object_rec=SQLSelectOne("SELECT * FROM objects WHERE TITLE='".DBSafe($linked[$il]['LINKED_OBJECT'])."'");
+                if ($object_rec['DESCRIPTION']) {
+                    $linked[$il]['DESCRIPTION']=$object_rec['DESCRIPTION'];
+                }
+            }
             $res[$i]['LINKED'] = $linked;
         }
     }

@@ -90,7 +90,7 @@
   [#if LINKED#]
   <br/>
   [#begin LINKED#]
-  <a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_noodevices&id=<#RESULT.ID#>&tab=data">[#LINKED_OBJECT#].[#LINKED_PROPERTY#][#if LINKED_METHOD!=""#] ([#LINKED_METHOD#])[#endif#];</a>
+   <div><a href="?data_source=<#DATA_SOURCE#>&view_mode=edit_noodevices&id=<#RESULT.ID#>&tab=data">[#LINKED_OBJECT#].[#LINKED_PROPERTY#]</a>[#if LINKED_METHOD!=""#] ([#LINKED_METHOD#])[#endif#] [#DESCRIPTION#]; [<b>[#VALUE#]</b>]</div>
   [#end LINKED#]
   [#endif LINKED#]
  </td>

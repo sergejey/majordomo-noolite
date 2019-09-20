@@ -366,11 +366,17 @@ class noolite extends module
                 return;
             }
 
-            $req_qry = "(ADDRESS LIKE '" . DBSafe($addr) . "' OR ADDRESS='" . (int)preg_replace('/\D/', '', $addr) . "')";
+            $num_addr=(int)preg_replace('/\D/', '', $addr);
+            $req_qry = "(ADDRESS LIKE '" . DBSafe($addr) . "'";
+            if ($num_addr>0) {
+                $req_qry.=" OR ADDRESS='".$num_addr."'";
+                $req_qry.=" OR ADDRESS='cell".($num_addr-1)."'";
+            }
+            $req_qry.=')';
             if ($this->config['API_TYPE'] != 'serial') {
                 $req_qry .= " AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor' OR DEVICE_TYPE LIKE '%_f')";
             }
-            $rec = SQLSelectOne("SELECT * FROM noodevices WHERE $req_qry");
+            $rec = SQLSelectOne("SELECT * FROM noodevices WHERE $req_qry ORDER BY ID LIMIT 1");
             if (!$rec['ID']) {
                 $rec['ADDRESS'] = $addr;
                 $rec['TITLE'] = $title;
