@@ -48,6 +48,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
         $readInProgress = 0;
         $readStarted = 0;
         $sequence = '';
+        $sequenceStart = false;
         while (1) {
 
             // CHECKPORT
@@ -68,6 +69,7 @@ if ($noo->config['API_TYPE'] == 'serial') {
                 $in = $ch;
                 $readInProgress = 1;
                 $readStarted = time();
+                $sequenceStart = true;
             } elseif ($ch == 'ae') {
                 $errors=0;
                 $line = $in . $ch;
@@ -90,9 +92,12 @@ if ($noo->config['API_TYPE'] == 'serial') {
                 echo date('Y-m-d H:i:s') . " URL: $url\n";
                 DebMes("IN: $line", 'noolite');
                 $res = get_headers($url);
+                $sequenceStart = false;
             } else {
-                $in .= $ch;
-                $readInProgress = 2;
+                if ($sequenceStart) {
+                    $in .= $ch;
+                    $readInProgress = 2;
+                }
             }
 
             if ($readInProgress > 0 && (time() - $readStarted) > 3) {
