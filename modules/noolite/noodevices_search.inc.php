@@ -9,6 +9,15 @@ if ($this->owner->name == 'panel') {
 $qry = "1";
 // search filters
 
+$go_linked_object=gr('go_linked_object');
+$go_linked_property=gr('go_linked_property');
+if ($go_linked_object && $go_linked_property) {
+    $tmp = SQLSelectOne("SELECT ID, DEVICE_ID FROM noocommands WHERE LINKED_OBJECT = '".DBSafe($go_linked_object)."' AND LINKED_PROPERTY='".DBSafe($go_linked_property)."'");
+    if ($tmp['ID']) {
+        $this->redirect("?id=".$tmp['ID']."&view_mode=edit_noodevices&id=".$tmp['DEVICE_ID']."&tab=data");
+    }
+}
+
 global $location_id;
 if ($location_id > 0) {
     $qry .= " AND noodevices.LOCATION_ID=" . (int)$location_id;
