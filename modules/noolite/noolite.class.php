@@ -35,19 +35,19 @@ class noolite extends module
     function saveParams($data = 0)
     {
         $p = array();
-        if (IsSet($this->id)) {
+        if (isset($this->id)) {
             $p["id"] = $this->id;
         }
-        if (IsSet($this->view_mode)) {
+        if (isset($this->view_mode)) {
             $p["view_mode"] = $this->view_mode;
         }
-        if (IsSet($this->edit_mode)) {
+        if (isset($this->edit_mode)) {
             $p["edit_mode"] = $this->edit_mode;
         }
-        if (IsSet($this->data_source)) {
+        if (isset($this->data_source)) {
             $p["data_source"] = $this->data_source;
         }
-        if (IsSet($this->tab)) {
+        if (isset($this->tab)) {
             $p["tab"] = $this->tab;
         }
         return parent::saveParams($p);
@@ -104,10 +104,10 @@ class noolite extends module
         } else {
             $this->usual($out);
         }
-        if (IsSet($this->owner->action)) {
+        if (isset($this->owner->action)) {
             $out['PARENT_ACTION'] = $this->owner->action;
         }
-        if (IsSet($this->owner->name)) {
+        if (isset($this->owner->name)) {
             $out['PARENT_NAME'] = $this->owner->name;
         }
         $out['VIEW_MODE'] = $this->view_mode;
@@ -145,6 +145,8 @@ class noolite extends module
         $out['API_IGNORE'] = $this->config['API_IGNORE'];
         $out['API_BINDING'] = $this->config['API_BINDING'];
         $out['API_PORT'] = $this->config['API_PORT'];
+        $out['API_RESEND_POWER'] = $this->config['API_RESEND_POWER'];
+
         if ($this->view_mode == 'update_settings') {
             global $api_url;
             $this->config['API_URL'] = $api_url;
@@ -154,13 +156,12 @@ class noolite extends module
             $this->config['API_IGNORE'] = (int)$api_ignore;
             global $api_binding;
             $this->config['API_BINDING'] = (int)$api_binding;
-
             global $api_gate;
             $this->config['API_GATE'] = $api_gate;
-
-
             global $api_port;
             $this->config['API_PORT'] = trim($api_port);
+
+            $this->config['API_RESEND_POWER'] = gr('api_resend_power');
 
             $this->saveConfig();
             setGlobal('cycle_nooliteControl', 'restart');
@@ -170,8 +171,11 @@ class noolite extends module
             $out['SET_DATASOURCE'] = 1;
         }
 
-        if($this->view_mode=='refresh_noodevices') {
+        if ($this->view_mode == 'refresh_noodevices') {
             $this->pollNooDevices();
+            if ($this->config['API_RESEND_POWER']) {
+                $this->resendPower();
+            }
             $this->redirect("?");
         }
 
@@ -200,7 +204,8 @@ class noolite extends module
         }
     }
 
-    function pollNooDevices($id=0) {
+    function pollNooDevices($id = 0)
+    {
 
         if ($this->config['API_TYPE'] != 'windows_one' && $this->config['API_TYPE'] != 'serial') {
             // not supported
@@ -209,31 +214,31 @@ class noolite extends module
 
         // CHECK POLLING DEVICES
         if ($id) {
-            $polling=SQLSelect("SELECT * FROM noodevices WHERE ID=".(int)$id);
+            $polling = SQLSelect("SELECT * FROM noodevices WHERE ID=" . (int)$id);
         } else {
-            $polling=SQLSelect("SELECT * FROM noodevices WHERE POLL_PERIOD>0");
+            $polling = SQLSelect("SELECT * FROM noodevices WHERE POLL_PERIOD>0");
         }
 
-        foreach($polling as &$pdevice) {
+        foreach ($polling as &$pdevice) {
             if (!preg_match('/\_f$/', $pdevice['DEVICE_TYPE'])) {
                 // not supported
                 continue;
             }
 
             if ($id) {
-                $tm=0;
+                $tm = 0;
             } else {
-                $tm=strtotime($pdevice['UPDATED']);
+                $tm = strtotime($pdevice['UPDATED']);
             }
 
-            if ((time()-$tm)>=$pdevice['POLL_PERIOD']) {
-                $pdevice['UPDATED']=date('Y-m-d H:i:s');
-                SQLUpdate('noodevices',$pdevice);
+            if ((time() - $tm) >= $pdevice['POLL_PERIOD']) {
+                $pdevice['UPDATED'] = date('Y-m-d H:i:s');
+                SQLUpdate('noodevices', $pdevice);
                 $controller_mode = '2';
                 $address = preg_replace('/\D/', '', $pdevice['ADDRESS']);
                 $cmd_code = 128;
                 $fmt = 0;
-                $api_command = $controller_mode . ' 0 0 ' . $address . ' ' . $cmd_code . ' '.$fmt.' 0 0 0 0 00000000 0';
+                $api_command = $controller_mode . ' 0 0 ' . $address . ' ' . $cmd_code . ' ' . $fmt . ' 0 0 0 0 00000000 0';
                 //DebMes("Polling ".$pdevice['TITLE']." with API: $api_command",'noolite');
                 $this->sendAPICommand($api_command);
             }
@@ -256,18 +261,18 @@ class noolite extends module
 
         if ($this->ajax) {
 
-            $op=gr('op');
+            $op = gr('op');
 
-            if ($op=='check_binding') {
-                $start_binding=gr('start_binding','int');
-                $id=gr('id','int');
+            if ($op == 'check_binding') {
+                $start_binding = gr('start_binding', 'int');
+                $id = gr('id', 'int');
                 header("Content-type:application/json");
-                $result=array();
-                $tmp=SQLSelectOne("SELECT ID FROM noocommands WHERE DEVICE_ID=".$id." AND COMMAND_ID=15 AND UPDATED>='".date('Y-m-d H:i:s',$start_binding)."'");
+                $result = array();
+                $tmp = SQLSelectOne("SELECT ID FROM noocommands WHERE DEVICE_ID=" . $id . " AND COMMAND_ID=15 AND UPDATED>='" . date('Y-m-d H:i:s', $start_binding) . "'");
                 if ($tmp['ID']) {
-                    $result['RESULT']='ok';
+                    $result['RESULT'] = 'ok';
                 } else {
-                    $result['RESULT']='waiting';
+                    $result['RESULT'] = 'waiting';
                 }
                 echo json_encode($result);
                 exit;
@@ -346,7 +351,7 @@ class noolite extends module
                 $d1 = $_GET['d1'];
                 $d2 = $_GET['d2'];
                 $d3 = $_GET['d3'];
-            } elseif ($this->config['API_TYPE'] == 'linux' && IsSet($_GET['channel'])) {
+            } elseif ($this->config['API_TYPE'] == 'linux' && isset($_GET['channel'])) {
                 $addr = 'ch' . $_GET['channel'];
                 $title = 'Channel ' . $_GET['channel'];
                 $command_id = (int)$_GET['command'];
@@ -356,9 +361,9 @@ class noolite extends module
                 $d3 = $_GET['d3'];
             }
 
-            if ($addr=='') {
+            if ($addr == '') {
                 echo "No address set";
-                DebMes("No address set",'noolite');
+                DebMes("No address set", 'noolite');
                 return;
             }
 
@@ -366,13 +371,13 @@ class noolite extends module
                 return;
             }
 
-            $num_addr=(int)preg_replace('/\D/', '', $addr);
+            $num_addr = (int)preg_replace('/\D/', '', $addr);
             $req_qry = "(ADDRESS LIKE '" . DBSafe($addr) . "'";
-            if ($num_addr>0) {
-                $req_qry.=" OR ADDRESS='".$num_addr."'";
-                $req_qry.=" OR ADDRESS='cell".($num_addr-1)."'";
+            if ($num_addr > 0) {
+                $req_qry .= " OR ADDRESS='" . $num_addr . "'";
+                $req_qry .= " OR ADDRESS='cell" . ($num_addr - 1) . "'";
             }
-            $req_qry.=')';
+            $req_qry .= ')';
             if ($this->config['API_TYPE'] != 'serial') {
                 $req_qry .= " AND (DEVICE_TYPE='' OR DEVICE_TYPE='sensor' OR DEVICE_TYPE LIKE '%_f')";
             }
@@ -400,7 +405,7 @@ class noolite extends module
                 $value = '1';
             } elseif ($command_id == 21) { // temperature/humidity
                 $command_id = 121; // temperature
-                if (IsSet($t)) {
+                if (isset($t)) {
                     $value = $t;
                 } else {
                     $b1 = (int)str_replace('-', '', $d0);
@@ -414,13 +419,13 @@ class noolite extends module
                     }
                 }
                 $command_id2 = 122; // humidity
-                if (IsSet($rh) && $rh > 0) {
+                if (isset($rh) && $rh > 0) {
                     $value2 = $rh;
                 } else {
                     $value2 = (int)str_replace('-', '', $d2);
                 }
             } elseif ($command_id == 130) { // state command
-                $feedback=1;
+                $feedback = 1;
                 //return; // temporary disabled
                 //state received
                 //d1 -- version
@@ -444,7 +449,7 @@ class noolite extends module
                         $value2 = floor($d3 * 100 / 256);
                     }
                 } else {
-                    DebMes("Incorrect status command for device type ".$rec['DEVICE_TYPE'],'noolite');
+                    DebMes("Incorrect status command for device type " . $rec['DEVICE_TYPE'], 'noolite');
                     return;
                 }
             }
@@ -499,7 +504,7 @@ class noolite extends module
                 SQLUpdate('noocommands', $command);
                 if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
                     if ($feedback) {
-                        setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], array($this->name => '0'),$this->name); //)
+                        setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], array($this->name => '0'), $this->name); //)
                     } else {
                         setGlobal($command['LINKED_OBJECT'] . '.' . $command['LINKED_PROPERTY'], $command['VALUE'], 0, $this->name); //, array($this->name=>'0')
                     }
@@ -647,7 +652,7 @@ class noolite extends module
             DebMes("Sending noo api request: " . $url, 'noolite');
             getURL($url, 0);
         } elseif ($this->config['API_TYPE'] == 'serial') {
-            addToOperationsQueue('noolite_queue','command',$api_command);
+            addToOperationsQueue('noolite_queue', 'command', $api_command);
             /*
             $current_queue = getGlobal('noolitePushMessage');
             $queue = explode("\n", $current_queue);
@@ -882,6 +887,7 @@ class noolite extends module
     function install($data = '')
     {
         parent::install();
+        subscribeToEvent($this->name, 'HOURLY');
     }
 
     /**
@@ -896,6 +902,29 @@ class noolite extends module
         SQLExec('DROP TABLE IF EXISTS noodevices');
         SQLExec('DROP TABLE IF EXISTS noocommands');
         parent::uninstall();
+    }
+
+    function resendPower()
+    {
+        $command_types = array('102');
+        $commands = SQLSelect("SELECT noocommands.* FROM noocommands LEFT JOIN noodevices ON noocommands.DEVICE_ID=noodevices.ID WHERE LINKED_OBJECT!='' AND LINKED_PROPERTY!='' AND COMMAND_ID IN (" . implode(',', $command_types) . ") ORDER BY noocommands.DEVICE_ID");
+        $total = count($commands);
+        for ($i = 0; $i < $total; $i++) {
+            $obj = getObject($commands[$i]['LINKED_OBJECT']);
+            if ($obj) {
+                $value = $obj->getProperty($commands[$i]['LINKED_PROPERTY']);
+                $this->propertySetHandle($commands[$i]['LINKED_OBJECT'], $commands[$i]['LINKED_PROPERTY'], $value);
+            }
+        }
+    }
+
+    function processSubscription($event, $data)
+    {
+        $this->getConfig();
+        if ($event == 'HOURLY' && $this->config['API_RESEND_POWER']) {
+            // resend power status every hour
+            $this->resendPower();
+        }
     }
 
     /**

@@ -74,14 +74,24 @@ timeout = 250</pre>
  </div>
 </div>
 
-<!--#
-<div class="form-group">
- <label class="control-label"[#if ERR_API_URL#] style="color:red;font-weight:bold"[#endif#]>
- API URL:
- </label>
- <div class="controls"><input type="text" name="api_url" value="<#API_URL#>" class="input"></div>
-</div>
-#-->
+    <div class="form-group">
+        <label class="control-label">
+            &nbsp;
+        </label>
+        <div class="controls">
+            <input type="checkbox" name="api_resend_power" value="1"[#if API_RESEND_POWER="1"#] checked[#endif#]> Auto-resend power signal every hour
+        </div>
+    </div>
+
+
+    <!--#
+    <div class="form-group">
+     <label class="control-label"[#if ERR_API_URL#] style="color:red;font-weight:bold"[#endif#]>
+     API URL:
+     </label>
+     <div class="controls"><input type="text" name="api_url" value="<#API_URL#>" class="input"></div>
+    </div>
+    #-->
 
 
 <div class="form-actions">
